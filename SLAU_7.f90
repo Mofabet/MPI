@@ -5,7 +5,7 @@ include 'mpif.h'
 INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
 integer :: i, j, n1, n2, m1, m2, c_1, c_2, c_3, c_4, duck_1, disp, iter
 double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), MBAND(:,:), iBAND(:,:), X(:,:), X_0(:,:), X_1(:,:), g(:,:), g_0(:,:)
-double precision :: tmp, tmp_2, eps, err_0, error, tmp, tmp_2,
+double precision :: tmp, tmp_2, eps, err_0, error,
 
 call MPI_INIT(ERR)
 call MPI_COMM_SIZE(MPI_COMM_WORLD, SIZE, ERR)
@@ -28,8 +28,8 @@ if (RANK .eq. 0) then
   open(10, file = 'B', form = 'formatted', status = 'unknown')
   read(10,*)n2 !=n1
   read(10,*)m2 !=1
-
-  allocate(B) !???
+allocate(A(n1,m1), B(n2,m2)
+  !???
 
   do i=1,n2
       read(10,*)(B(i,j), j=1)
