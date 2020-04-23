@@ -4,8 +4,9 @@ implicit none
 include 'mpif.h'
 INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
 integer :: i, j, n1, n2, m1, m2, c_1, c_2, c_3, c_4, duck_1, disp, iter
-double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), MBAND(:,:), iBAND(:,:), X(:,:), X_0(:,:), X_1(:,:), g(:,:), g_0(:,:)
-double precision :: tmp, tmp_2, eps, err_0, error,
+double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), MBAND(:,:), iBAND(:,:)
+double precision, allocatable :: X(:,:), X_0(:,:), X_1(:,:), g(:,:), g_0(:,:)
+double precision :: tmp, tmp_2, eps, err_0, error
 
 call MPI_INIT(ERR)
 call MPI_COMM_SIZE(MPI_COMM_WORLD, SIZE, ERR)
@@ -13,22 +14,10 @@ call MPI_COMM_RANK(MPI_COMM_WORLD, RANK, ERR)
 
 allocate(A(:,:), B(:,:), C(:,:),D(:,:), E(:,:), MBAND(SIZE),iBAND(:,:))
 
-if (RANK .eq. 0) then
-  write(6,*)'Точность'
-  read(*,*)eps
-
-  open(10, file = 'A', form = 'formatted', status = 'unknown')
-  read(10,*)n1
-  read(10,*)m1
-
-  do i=1,n1
-      read(10,*)(A(i,j), j=1,m1)
-  enddo
-
   open(10, file = 'B', form = 'formatted', status = 'unknown')
   read(10,*)n2 !=n1
   read(10,*)m2 !=1
-allocate(A(n1,m1), B(n2,m2)
+allocate(A(n1,m1), B(n2,m2))
   !???
 
   do i=1,n2
@@ -119,7 +108,7 @@ X_0=0.d0
    do c_1 = 1 , MBAND(RANK+1)
       tmp = 0.d0
       do c_2 = 1,m1
-         tmp = tmp + band(???)*X_0(c_2)
+         tmp = tmp + MAND(c_1,c_2)*X_0(c_2)
       enddo
       X_1(c_1) = tmp + g_0(c_1)
       !write(6,*),X(c_1),RANK
@@ -127,7 +116,7 @@ X_0=0.d0
    !write(6,*),X(c_1),RANK
    !-----------------ERR
 
-  loc_err = 0.d0
+  err_0 = 0.d0
   !duck_1 = duck_1 + 1
   !write(6,*),duck_1,RANK
 !C-C-C
@@ -158,14 +147,14 @@ X_0=0.d0
   call MPI_BCAST(X,m1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ERR)
   call MPI_BCAST(error,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ERR)
   if(error .lt. eps) then
-   goto (FINAL), 1
+   goto 1000
   endif
        enddo
 
 !ccc                                                                        !ccc
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-FINAL:        if (RANK .eq. 0) then
+1000        if (RANK .eq. 0) then
                 do c_1 = 1, n1
                  write(6,*)'X = ',c_1,' = ',X_0(c_1)
                 enddo
