@@ -98,7 +98,7 @@ if (RANK .eq. 0) then
   !allocate(iBAND(:,:)) !0
 !--------------------------------------------------------------
     do c_1 = 1, SIZE - 1
-      deallocate(g_0(MBAND(c_1)))
+      allocate(g_0(MBAND(c_1)))
       do c_2 = 1, MBAND(c_1)
         g_0(c_2) = g(c_1+disp(c_1))  !VEKTOR G
       enddo
