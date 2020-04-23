@@ -112,8 +112,8 @@ if (RANK .eq. 0) then
 else !65 74                                                                                            !|
   allocate(g_0(MBAND(RANK+1))) !COL                                                                    !|
   allocate(iBAND(MBAND(RANK+1),m1))          ! ne 0                                                    !|
-    CALL MPI_RECV(iBAND,BAND(RANK+1)*m1,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR)          !|
-    CALL MPI_RECV(g_0,BAND(RANK+1),MPI_DOUBLE_PRECISION,0,30+RANK,MPI_COMM_WORLD,ST,ERR)          !<-----
+    CALL MPI_RECV(iBAND,MBAND(RANK+1)*m1,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR)          !|
+    CALL MPI_RECV(g_0,MBAND(RANK+1),MPI_DOUBLE_PRECISION,0,30+RANK,MPI_COMM_WORLD,ST,ERR)          !<-----
 endif !65
 
 !all 2
@@ -127,7 +127,7 @@ X_0=0.d0
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !ccc                                                                        !ccc
 
-  do iteration = 1,100 !raws   -----ITER C
+  do iter = 1,100 !raws   -----ITER C
    duck_1 = 0.d0
    do c_1 = 1 , MBAND(RANK+1)
       tmp = 0.d0
