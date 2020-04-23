@@ -3,7 +3,7 @@ program SLAU
 implicit none
 include 'mpif.h'
 INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
-integer :: i, j, n1, n2, m1, m2, c_1, c_2, c_3, c_4, duck_1, disp, iter
+integer :: i, j, n1, n2, m1, m2, c_1, c_2, c_3, c_4, duck_1, duck_2, disp, iter
 double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), MBAND(:,:), iBAND(:,:)
 double precision, allocatable :: X(:,:), X_0(:,:), X_1(:,:), g(:,:), g_0(:,:)
 double precision :: tmp, tmp_2, eps, err_0, error
@@ -12,12 +12,27 @@ call MPI_INIT(ERR)
 call MPI_COMM_SIZE(MPI_COMM_WORLD, SIZE, ERR)
 call MPI_COMM_RANK(MPI_COMM_WORLD, RANK, ERR)
 
-allocate(A(:,:), B(:,:), C(:,:),D(:,:), E(:,:), MBAND(SIZE),iBAND(:,:))
+allocate(MBAND(SIZE),iBAND(SIZE),disp(SIZE))
 
-  open(10, file = 'B', form = 'formatted', status = 'unknown')
-  read(10,*)n2 !=n1
-  read(10,*)m2 !=1
-allocate(A(n1,m1), B(n2,m2))
+if (RANK .eq. 0) then
+  write (6,*)'Eps'
+  read(*,*)Eps
+
+open(10, file = 'A', form = 'formatted', status = 'unknown')
+read(10,*)n1
+read(10,*)m1
+
+allocate(A(n1,m1), B(n1,m1), C(n1,m1), D(n1,m1), E(n1,m1)) !Core_0
+
+do i=1,n1
+    read(10,*)(A(i,j), j=1)
+enddo
+
+open(10, file = 'B', form = 'formatted', status = 'unknown')
+read(10,*)n2 !=n1
+read(10,*)m2 !=1
+
+!allocate(A(n1,m1), B(n2,m2))
   !???
 
   do i=1,n2
@@ -40,7 +55,7 @@ allocate(A(n1,m1), B(n2,m2))
     !X_0
   enddo
   enddo
-
+allocate(MBAND(:,:))
   MBAND(:) = N1/SIZE
 
   do i = 1, mod(n1, SIZE)
@@ -60,8 +75,8 @@ CALL MPI_BCAST(eps, 1, MPI_REAL, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ERR)
 !!!
  !---
-allocate(g(:,:))
-allocate(g_0(MBAND(RANK+1)))
+allocate(g(n1))
+!allocate(g_0(MBAND(RANK+1)))
 
 if (RANK .eq. 0) then
 
@@ -74,20 +89,29 @@ if (RANK .eq. 0) then
           iBAND(i,j) = E(c_1+disp) !заполнение, c_1 i+j
       enddo
     enddo
-      !send&
-      !call MPI_SEND(iBAND,MPI_DOUBLE_PRECISION,000000,,MPI_COMM_WORLD,ERR) !---
+      !send& и нужен деалок
+      call MPI_SEND(iBAND,MPI_DOUBLE_PRECISION,c_1,c_1,MPI_COMM_WORLD,ERR)
+      deallocate (iBAND)!---
+      !duck_2 = duck_2 + 1
+      !write(6,*),duck_2,RANK
   enddo !68 79
+  !allocate(iBAND(:,:)) !0
 !--------------------------------------------------------------
     do c_1 = 1, SIZE - 1
+      deallocate(g_0(MBAND(c_1)))
       do c_2 = 1, MBAND(c_1)
         g_0(c_2) = g(c_1+disp(c_1))  !VEKTOR G
       enddo
         call MPI_SEND(g_0, MBAND(c_1),MPI_DOUBLE_PRECISION, c_1, 30+RANK+c_1, MPI_COMM_WORLD, ERR) !-----
         deallocate(g_0)                                                                                !|
-    enddo!!!!!!!!!!!!!!!                                                                               !|
+        !                                                                                              !|
+    enddo!!!!!!!!!!!!!!! теперь нет айбенда и g                                                        !|
+    !allocate(g_0(:,:))   !0                                                                           !|
  !--------------------------------------------------------------                                       !|
  !deallocate(?)                                                                                        !|
 else !65 74                                                                                            !|
+  allocate(g_0(MBAND(RANK+1))) !COL                                                                    !|
+  allocate(iBAND(MBAND(RANK+1),m1))          ! ne 0                                                    !|
     CALL MPI_RECV(iBAND,BAND(RANK+1)*m1,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR)          !|
     CALL MPI_RECV(g_0,BAND(RANK+1),MPI_DOUBLE_PRECISION,0,30+RANK,MPI_COMM_WORLD,ST,ERR)          !<-----
 endif !65
@@ -95,7 +119,7 @@ endif !65
 !all 2
           !  =0.d0
           !alloc?
-allocate(X_0(:,:))
+!allocate(X_0(:,:)) !все?
 allocate(X_0(m1))
 allocate(X_1(MBAND(RANK+1)))
 X_0=0.d0
