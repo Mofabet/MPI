@@ -1,12 +1,12 @@
 program SLAU
-
 implicit none
 include 'mpif.h'
 INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
-integer :: i, j, n1, n2, m1, m2, c_1, c_2, c_3, c_4, duck_1, duck_2, disp, iter
-double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), MBAND(:,:), iBAND(:,:)
-double precision, allocatable :: X(:,:), X_0(:,:), X_1(:,:), g(:,:), g_0(:,:)
-double precision :: tmp, tmp_2, eps, err_0, error
+integer :: i, j, n1, n2, m1, m2, c_1, c_2, c_3, c_4, duck_1, duck_2, iter
+integer, allocatable ::  MBAND(:), disp(:)
+double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), iBAND(:,:)
+double precision, allocatable :: X(:,:), X_0(:,:), X_1(:,:), g(:,:), g_0(:,:), tmp_alloc (:,:)
+double precision :: tmp, eps, err_0, error
 
 call MPI_INIT(ERR)
 call MPI_COMM_SIZE(MPI_COMM_WORLD, SIZE, ERR)
@@ -25,7 +25,7 @@ read(10,*)m1
 allocate(A(n1,m1), B(n1,m1), C(n1,m1), D(n1,m1), E(n1,m1)) !Core_0
 
 do i=1,n1
-    read(10,*)(A(i,j), j=1)
+    read(10,*)(A(i,j), j=1,n1)
 enddo
 
 open(10, file = 'B', form = 'formatted', status = 'unknown')
@@ -36,7 +36,7 @@ read(10,*)m2 !=1
   !???
 
   do i=1,n2
-      read(10,*)(B(i,j), j=1)
+      read(10,*)(B(i,j), j=1,n1)
   enddo
 
   ! A*x=b
@@ -159,12 +159,12 @@ X_0=0.d0
     enddo
 
     do c_3 = 1, SIZE-1
-       allocate(tmp_2(MBAND(c_3)))
-       call MPI_RECV(tmp_2,MBAND,MPI_DOUBLE_PRECISION,c_3,40*RANK,MPI_COMM_WORLD, ERR)
+       allocate(tmp_alloc(MBAND(c_3)))
+       call MPI_RECV(tmp_alloc,MBAND,MPI_DOUBLE_PRECISION,c_3,40*RANK,MPI_COMM_WORLD, ERR)
              do c_4 = 1,MBAND(c_3)
-               X(c_4+disp(c_3))=tmp_2(c_4)
+               X(c_4+disp(c_3))=tmp_alloc(c_4)
             enddo
-       deallocate(tmp_2)
+       deallocate(tmp_alloc)
     enddo
 !C-C-C
   endif !131 137
