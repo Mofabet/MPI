@@ -92,7 +92,7 @@ if (RANK .eq. 0) then
       enddo
     enddo
       !send& и нужен деалок
-      call MPI_SEND(iBAND, MBAND(c_1+1),m1,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)
+      call MPI_SEND(iBAND, MBAND(c_1+1)*m1,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)
       deallocate (iBAND)!---
       !duck_2 = duck_2 + 1
       !write(6,*),duck_2,RANK
