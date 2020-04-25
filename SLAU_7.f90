@@ -62,8 +62,8 @@ read(10,*)m2 !=1
       MBAND(i) = MBAND(i)+1
   enddo
   disp(1) = 0
-  do i =2,SIZE
-      disp(i) = disp(i-1)+MBAND(i-1)-1
+  do c_1 =2,SIZE
+      disp(c_1) = disp(c_1-1)+MBAND(c_1-1)-1
   enddo
 !  disp = MBAND(1)-1 !пока 1
 endif ! 16
@@ -88,7 +88,7 @@ if (RANK .eq. 0) then
     allocate(iBAND(MBAND(c_1+1),m1))
     do c_2 = 1, MBAND(c_1)!m     !do c_1 = 1,iBAND
       do c_3 = 1, m1
-          iBAND(c_2,c_3) = E(c_2+disp(с_1+1)-1,c_3) !заполнение, c_1 i+j
+          iBAND(c_2,c_3) = E(disp(с_1 + 1) + c_2 - 1, c_3) !заполнение, c_1 i+j
       enddo
     enddo
       !send& и нужен деалок
