@@ -5,14 +5,14 @@ INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
 integer :: i, j, n1, n2, m1, m2, c_1, c_2, c_3, c_4, duck_1, duck_2, iter
 integer, allocatable ::  MBAND(:), disp(:)
 double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), iBAND(:,:)
-double precision, allocatable :: X(:,:), X_0(:,:), X_1(:,:), g(:,:), g_0(:,:), tmp_alloc (:,:)
+double precision, allocatable :: X(:), X_0(:), X_1(:), g(:), g_0(:), tmp_alloc (:)
 double precision :: tmp, eps, err_0, error
 
 call MPI_INIT(ERR)
 call MPI_COMM_SIZE(MPI_COMM_WORLD, SIZE, ERR)
 call MPI_COMM_RANK(MPI_COMM_WORLD, RANK, ERR)
 
-allocate(MBAND(SIZE),iBAND(SIZE),disp(SIZE))
+allocate(MBAND(SIZE),disp(SIZE))
 
 if (RANK .eq. 0) then
   write (6,*)'Eps'
@@ -61,9 +61,9 @@ allocate(MBAND(:,:))
   do i = 1, mod(n1, SIZE)
       MBAND(i) = MBAND(i)+1
   enddo
-  disp(1)=0
+  disp(1) = 0
   do i =2,SIZE
-      disp(i)=disp(i-1)+MBAND(i-1)
+      disp(i) = disp(i - 1) + MBAND(i - 1) - 1
   enddo
 !  disp = MBAND(1)-1 !пока 1
 endif ! 16
@@ -71,6 +71,8 @@ endif ! 16
 !!!
 CALL MPI_BCAST(n1, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(m1, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
+CALL MPI_BCAST(n2, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
+CALL MPI_BCAST(m2, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(eps, 1, MPI_REAL, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ERR)
 !!!
@@ -83,14 +85,14 @@ if (RANK .eq. 0) then
   !  iBAND = MBAND(i+1)
 !--------------------------------------------------------------
   do c_1 = 1,SIZE-1
-    allocate(iBAND(MBAND(c_1),m1))
+    allocate(iBAND(MBAND(c_1 + 1),m1))
     do c_2 = 1, MBAND(c_1)!m     !do c_1 = 1,iBAND
       do c_3 = 1, m1
-          iBAND(i,j) = E(c_1+disp) !заполнение, c_1 i+j
+          iBAND(c_2,c_3) = E(c_1 + disp(с_1 + 1) - 1, c_3) !заполнение, c_1 i+j
       enddo
     enddo
       !send& и нужен деалок
-      call MPI_SEND(iBAND,MPI_DOUBLE_PRECISION,c_1,c_1,MPI_COMM_WORLD,ERR)
+      call MPI_SEND(iBAND, MBAND(c_1 + 1),m1,MPI_DOUBLE_PRECISION,c_1,c_1*10,MPI_COMM_WORLD,ERR)
       deallocate (iBAND)!---
       !duck_2 = duck_2 + 1
       !write(6,*),duck_2,RANK
@@ -100,7 +102,7 @@ if (RANK .eq. 0) then
     do c_1 = 1, SIZE - 1
       allocate(g_0(MBAND(c_1)))
       do c_2 = 1, MBAND(c_1)
-        g_0(c_2) = g(c_1+disp(c_1))  !VEKTOR G
+        g_0(c_2) = g(c_1+disp(c_1) + 1)  !VEKTOR G
       enddo
         call MPI_SEND(g_0, MBAND(c_1),MPI_DOUBLE_PRECISION, c_1, 30+RANK+c_1, MPI_COMM_WORLD, ERR) !-----
         deallocate(g_0)                                                                                !|
@@ -112,7 +114,7 @@ if (RANK .eq. 0) then
 else !65 74                                                                                            !|
   allocate(g_0(MBAND(RANK+1))) !COL                                                                    !|
   allocate(iBAND(MBAND(RANK+1),m1))          ! ne 0                                                    !|
-    CALL MPI_RECV(iBAND,MBAND(RANK+1)*m1,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR)          !|
+    CALL MPI_RECV(iBAND,MBAND(RANK+1)*m1,MPI_DOUBLE_PRECISION,0,10*RANK,MPI_COMM_WORLD,ST,ERR)        !|
     CALL MPI_RECV(g_0,MBAND(RANK+1),MPI_DOUBLE_PRECISION,0,30+RANK,MPI_COMM_WORLD,ST,ERR)          !<-----
 endif !65
 
@@ -120,8 +122,8 @@ endif !65
           !  =0.d0
           !alloc?
 !allocate(X_0(:,:)) !все?
-allocate(X_0(m1))
-allocate(X_1(MBAND(RANK+1)))
+!allocate(X_0(m1))
+!allocate(X_1(MBAND(RANK+1)))
 X_0=0.d0
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -132,7 +134,7 @@ X_0=0.d0
    do c_1 = 1 , MBAND(RANK+1)
       tmp = 0.d0
       do c_2 = 1,m1
-         tmp = tmp + MAND(c_1,c_2)*X_0(c_2)
+         tmp = tmp + MBAND(c_1,c_2)*X_0(c_2)
       enddo
       X_1(c_1) = tmp + g_0(c_1)
       !write(6,*),X(c_1),RANK

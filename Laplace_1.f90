@@ -10,3 +10,15 @@ double precision :: tmp, tmp_2, eps, err_0, error,
 call MPI_INIT(ERR)
 call MPI_COMM_SIZE(MPI_COMM_WORLD, SIZE, ERR)
 call MPI_COMM_RANK(MPI_COMM_WORLD, RANK, ERR)
+
+if (RANK .eq. 0) then
+  write(6,*)'Точность'
+  read(*,*)eps
+
+  open(10, file = 'A', form = 'formatted', status = 'unknown')
+  read(10,*)n1
+  read(10,*)m1
+
+  do i=1,n1
+      read(10,*)(A(i,j), j=1,m1)
+  enddo
