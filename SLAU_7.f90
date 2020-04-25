@@ -5,7 +5,7 @@ INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
 integer :: i, j, n1, n2, m1, m2, c_1, c_2, c_3, c_4, duck_1, duck_2, iter
 integer, allocatable ::  MBAND(:), disp(:)
 double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), iBAND(:,:)
-double precision, allocatable :: X(:), X_0(:), X_1(:), g(:), g_0(:), tmp_alloc (:)
+double precision, allocatable :: X(:), X_0(:), X_1(:), g(:), g_0(:), tmp_alloc(:)
 double precision :: tmp, eps, err_0, error
 
 call MPI_INIT(ERR)
@@ -55,7 +55,7 @@ read(10,*)m2 !=1
     !X_0
   enddo
   enddo
-allocate(MBAND(:,:))
+!allocate(MBAND(SIZE))
   MBAND(:) = N1/SIZE
 
   do i = 1, mod(n1, SIZE)
@@ -63,7 +63,7 @@ allocate(MBAND(:,:))
   enddo
   disp(1) = 0
   do i =2,SIZE
-      disp(i) = disp(i - 1) + MBAND(i - 1) - 1
+      disp(i) = disp(i-1)+MBAND(i-1)-1
   enddo
 !  disp = MBAND(1)-1 !пока 1
 endif ! 16
@@ -85,21 +85,21 @@ if (RANK .eq. 0) then
   !  iBAND = MBAND(i+1)
 !--------------------------------------------------------------
   do c_1 = 1,SIZE-1
-    allocate(iBAND(MBAND(c_1 + 1),m1))
+    allocate(iBAND(MBAND(c_1+1),m1))
     do c_2 = 1, MBAND(c_1)!m     !do c_1 = 1,iBAND
       do c_3 = 1, m1
-          iBAND(c_2,c_3) = E(c_1 + disp(с_1 + 1) - 1, c_3) !заполнение, c_1 i+j
+          iBAND(c_2,c_3) = E(c_2+disp(с_1+1)-1,c_3) !заполнение, c_1 i+j
       enddo
     enddo
       !send& и нужен деалок
-      call MPI_SEND(iBAND, MBAND(c_1 + 1),m1,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)
+      call MPI_SEND(iBAND, MBAND(c_1+1),m1,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)
       deallocate (iBAND)!---
       !duck_2 = duck_2 + 1
       !write(6,*),duck_2,RANK
   enddo !68 79
   !allocate(iBAND(:,:)) !0
 !--------------------------------------------------------------
-    do c_1 = 1, SIZE - 1
+    do c_1 = 1, SIZE-1
       allocate(g_0(MBAND(c_1)))
       do c_2 = 1, MBAND(c_1)
         g_0(c_2) = g(c_1+disp(c_1) + 1)  !VEKTOR G
