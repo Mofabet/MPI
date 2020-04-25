@@ -36,7 +36,7 @@ read(10,*)m2 !=1
   !???
 
   do i=1,n2
-      read(10,*)(B(i,j), j=1,n1)
+      read(10,*)(B(i,j), j=1,m2)
   enddo
 
   ! A*x=b
@@ -92,7 +92,7 @@ if (RANK .eq. 0) then
       enddo
     enddo
       !send& и нужен деалок
-      call MPI_SEND(iBAND, MBAND(c_1 + 1),m1,MPI_DOUBLE_PRECISION,c_1,c_1*10,MPI_COMM_WORLD,ERR)
+      call MPI_SEND(iBAND, MBAND(c_1 + 1),m1,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)
       deallocate (iBAND)!---
       !duck_2 = duck_2 + 1
       !write(6,*),duck_2,RANK
@@ -114,8 +114,8 @@ if (RANK .eq. 0) then
 else !65 74                                                                                            !|
   allocate(g_0(MBAND(RANK+1))) !COL                                                                    !|
   allocate(iBAND(MBAND(RANK+1),m1))          ! ne 0                                                    !|
-    CALL MPI_RECV(iBAND,MBAND(RANK+1)*m1,MPI_DOUBLE_PRECISION,0,10*RANK,MPI_COMM_WORLD,ST,ERR)        !|
-    CALL MPI_RECV(g_0,MBAND(RANK+1),MPI_DOUBLE_PRECISION,0,30+RANK,MPI_COMM_WORLD,ST,ERR)          !<-----
+    CALL MPI_RECV(iBAND,MBAND(RANK+1)*m1,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR)         !|
+    CALL MPI_RECV(g_0,MBAND(RANK+1),MPI_DOUBLE_PRECISION,0,30+RANK,MPI_COMM_WORLD,ST,ERR)         !<-----
 endif !65
 
 !all 2
@@ -153,7 +153,9 @@ X_0=0.d0
   call MPI_REDUCE(err_0,error,1,MPI_DOUBLE_PRECISION,MPI_SUM,0,MPI_COMM_WORLD,ERR)
 
   if(RANK .ne. 0) then
-     call MPI_SEND(X_1,MBAND(RANK+1),MPI_DOUBLE_PRECISION,0,40*RANK,MPI_COMM_WORLD, ERR)
+    do i = 1,SIZE-1
+     call MPI_SEND(X_1,MBAND(RANK+1),MPI_DOUBLE_PRECISION,0,40+i,MPI_COMM_WORLD, ERR)
+    enddo
   else
     error = sqrt(error)
     do c_2 = 1,MBAND(RANK+1) !???
@@ -162,7 +164,7 @@ X_0=0.d0
 
     do c_3 = 1, SIZE-1
        allocate(tmp_alloc(MBAND(c_3)))
-       call MPI_RECV(tmp_alloc,MBAND,MPI_DOUBLE_PRECISION,c_3,40*RANK,MPI_COMM_WORLD, ERR)
+       call MPI_RECV(tmp_alloc,MBAND,MPI_DOUBLE_PRECISION,c_3,40+RANK,MPI_COMM_WORLD, ERR)
              do c_4 = 1,MBAND(c_3)
                X(c_4+disp(c_3))=tmp_alloc(c_4)
             enddo
