@@ -134,7 +134,7 @@ X_0=0.d0
    do c_1 = 1 , MBAND(RANK+1)
       tmp = 0.d0
       do c_2 = 1,m1
-         tmp = tmp + MBAND(c_1,c_2)*X_0(c_2)
+         tmp = tmp + iBAND(c_1,c_2)*X_0(c_2)
       enddo
       X_1(c_1) = tmp + g_0(c_1)
       !write(6,*),X(c_1),RANK
