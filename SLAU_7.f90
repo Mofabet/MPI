@@ -123,7 +123,7 @@ endif !65
           !alloc?
 !allocate(X_0(:,:)) !все?
 !allocate(X_0(m1))
-!allocate(X_1(MBAND(RANK+1)))
+allocate(X_1(MBAND(RANK+1)))
 X_0=0.d0
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -157,7 +157,7 @@ X_0=0.d0
      call MPI_SEND(X_1,MBAND(RANK+1),MPI_DOUBLE_PRECISION,0,40+i,MPI_COMM_WORLD, ERR)
     enddo
   else
-    error = sqrt(error)
+    !error = sqrt(error)
     do c_2 = 1,MBAND(RANK+1) !???
        X_0(c_2)=X_1(c_2)
     enddo
@@ -173,7 +173,8 @@ X_0=0.d0
 !C-C-C
   endif !131 137
   call MPI_BCAST(X,m1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ERR)
-  call MPI_BCAST(error,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ERR)
+  error = sqrt(error)
+!  call MPI_BCAST(error,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ERR)
   if(error .lt. eps) then
    goto 1000
   endif
