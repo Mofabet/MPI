@@ -177,7 +177,7 @@ endif !65
   call MPI_ALLREDUCE(err_0, error, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD,ERR)
   error = sqrt(error)
 
-  if(RANK .ne. 0) then
+  if(RANK .eq. 0) then
     write(6,*)'ERROR = ', error
     do c_1 = 1, MBAND(1)
       X_0(c_1) = X_1(c_1)
@@ -189,7 +189,7 @@ endif !65
     deallocate(X_1)
   endif
 
-  if(RANK .ne. 0) then
+  if(RANK .eq. 0) then
     do c_2 = 1, SIZE - 1
       allocate(X_1(MBAND(c_2 + 1)))
       call MPI_RECV(X_1, MBAND(c_2 + 1),MPI_DOUBLE_PRECISION,c_2,40 + c_2 + 100*iter,MPI_COMM_WORLD, ST, ERR)
