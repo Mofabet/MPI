@@ -101,9 +101,9 @@ if (RANK .eq. 0) then
       enddo
     enddo
       !send& и нужен деалок
-      call MPI_SEND(iBAND, MBAND(c_1+1)*m1,MPI_DOUBLE_PRECISION,c_1,20+RANK+c_1,MPI_COMM_WORLD,ERR)
+      call MPI_SEND(iBAND, MBAND(c_1 + 1)*m1,MPI_DOUBLE_PRECISION,c_1,20+RANK+c_1,MPI_COMM_WORLD,ERR)
       write(6,*)'SEND_1', rank
-      call MPI_SEND(g_0, MBAND(c_1),MPI_DOUBLE_PRECISION, c_1, 30+RANK+c_1, MPI_COMM_WORLD, ERR) !-----
+      call MPI_SEND(g_0, MBAND(c_1 + 1),MPI_DOUBLE_PRECISION, c_1, 30+RANK+c_1, MPI_COMM_WORLD, ERR) !-----
       write(6,*)'SEND_2', rank
       deallocate (iBAND, g_0)!---
       !duck_2 = duck_2 + 1
