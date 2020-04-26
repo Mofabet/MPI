@@ -132,7 +132,7 @@ endif
  enddo
                                                                                        !|
 else !65 74
-  allocate(X_0(n1),X(n1))                                                                                          !|
+  allocate(X_0(n1),Xёё(n1))                                                                                          !|
   allocate(g_0(MBAND(RANK+1))) !COL                                                                    !|
   allocate(iBAND(MBAND(RANK+1),m1))          ! ne 0                                                    !|
     CALL MPI_RECV(iBAND,MBAND(RANK+1)*m1,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR)       !|
@@ -151,7 +151,6 @@ endif !65
   do iter = 1,20 !raws   -----ITER C
     allocate(X_1(MBAND(RANK+1)))
     CALL MPI_BCAST(X_0, n1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ERR)
-    write(6,*)'BCAST', rank
     err_0 = 0.d0
     error = 0.d0
 
@@ -184,7 +183,6 @@ endif !65
     deallocate(X_1)
   else
     call MPI_SEND(X_1, MBAND(RANK + 1),MPI_DOUBLE_PRECISION,0,40 + RANK + 100*iter,MPI_COMM_WORLD,ERR)
-    write(6,*)'SEND_3', rank
     deallocate(X_1)
   endif
 
@@ -192,11 +190,10 @@ endif !65
     do c_2 = 1, SIZE - 1
       allocate(X_1(MBAND(c_2 + 1)))
       call MPI_RECV(X_1, MBAND(c_2 + 1),MPI_DOUBLE_PRECISION,c_2,40 + c_2 + 100*iter,MPI_COMM_WORLD, ST, ERR)
-      write(6,*)'RECV_3', rank
 
     !error = sqrt(error)
     do c_3 = 1, MBAND(c_2 + 1) !???
-       X_0(c_2 + (c_2 + 1)) = X_1(c_3)
+       X_0(c_2 + disp(c_2 + 1)) = X_1(c_3)
     enddo
     deallocate(X_1)
   enddo
