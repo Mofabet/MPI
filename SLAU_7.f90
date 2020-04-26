@@ -167,14 +167,16 @@ endif !65
 
   !duck_1 = duck_1 + 1
   !write(6,*),duck_1,RANK
-  do c_1 = 1 , MBAND(RANK+1)
-     err_0 = err_0 + ((X_1(c_1)-X_0(c_1 + disp(RANK+1)))**2)
-  enddo
 !MPI_REDUCE(SBUF, RBUF, COUNT, DATATYPE, OP, ROOT, COMM, IERR)
 !C-C-C
+do c_1 = 1 , MBAND(RANK+1)
+  write(6,*)'ERROR 01 = ', err_0
+  err_0 = err_0 + ((X_1(c_1)-X_0(c_1 + disp(RANK+1)))**2)
+  write(6,*)'ERROR 02 = ', err_0
+enddo
   call MPI_ALLREDUCE(err_0, error, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD,ERR)
   error = sqrt(error)
-
+write(6,*)'ERROR 03 = ', error
   if(RANK .eq. 0) then
     write(6,*)'ERROR = ', error
     do c_1 = 1, MBAND(1)
@@ -184,9 +186,7 @@ endif !65
   else
     call MPI_SEND(X_1, MBAND(RANK + 1),MPI_DOUBLE_PRECISION,0,40 + RANK + 100*iter,MPI_COMM_WORLD,ERR)
     deallocate(X_1)
-  endif
 
-  if(RANK .eq. 0) then
     do c_2 = 1, SIZE - 1
       allocate(X_1(MBAND(c_2 + 1)))
       call MPI_RECV(X_1, MBAND(c_2 + 1),MPI_DOUBLE_PRECISION,c_2,40 + c_2 + 100*iter,MPI_COMM_WORLD, ST, ERR)
