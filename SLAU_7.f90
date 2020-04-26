@@ -224,18 +224,18 @@ enddo
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 if (RANK .eq. 0) then
-            write(6,)'Max number of iter was reached = ', error
+            write(6,*)'Max number of iter was reached = ', error
                 do c_1 = 1, n1
-                   write(6,)'X = ',c_1,' = ',X(c_1)
+                   write(6,*)'X = ',c_1,' = ',X(c_1)
                 enddo
           endif
          goto 1001
 
 
 1000     if (RANK .eq. 0) then
-            write(6,)'accuracy was reached = ', error
+            write(6,*)'accuracy was reached = ', error
                 do c_1 = 1, n1
-                   write(6,)'X = ',c_1,' = ',X(c_1)
+                   write(6,*)'X = ',c_1,' = ',X(c_1)
                 enddo
           endif
 
