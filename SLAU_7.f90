@@ -205,14 +205,14 @@ endif !65
 !  call MPI_BCAST(X,m1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ERR)
 !  call MPI_BCAST(error,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ERR)
   if(error .lt. eps) goto 1000
-enddo!
 
 !ccc                                                                        !ccc
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-1000        if (RANK .eq. 0) then
+1000     if (RANK .eq. 0) then
+            write(6,*)'Error was reached = ', error
                 do c_1 = 1, n1
-                 write(6,*)'X = ',c_1,' = ',X_0(c_1)
+                 write(6,*)'X = ',c_1,' = ',X(c_1)
                 enddo
               endif
          call MPI_FINALIZE(ERR)
