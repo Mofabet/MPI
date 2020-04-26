@@ -132,7 +132,7 @@ endif
  enddo
                                                                                        !|
 else !65 74
-  allocate(X_0(n1),Xёё(n1))                                                                                          !|
+  allocate(X_0(n1),X(n1))                                                                                          !|
   allocate(g_0(MBAND(RANK+1))) !COL                                                                    !|
   allocate(iBAND(MBAND(RANK+1),m1))          ! ne 0                                                    !|
     CALL MPI_RECV(iBAND,MBAND(RANK+1)*m1,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR)       !|
