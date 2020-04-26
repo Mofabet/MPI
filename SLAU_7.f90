@@ -220,11 +220,21 @@ enddo
 !ccc                                                                        !ccc
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
-1000     if (RANK .eq. 0) then
-            write(6,*)'Error was reached = ', error
+if (RANK .eq. 0) then
+            write(6,)'Max number of iter was reached = ', error
                 do c_1 = 1, n1
-                 write(6,*)'X = ',c_1,' = ',X(c_1)
+                   write(6,)'X = ',c_1,' = ',X(c_1)
                 enddo
-              endif
-         call MPI_FINALIZE(ERR)
-     end
+          endif
+         goto 1001
+
+
+1000     if (RANK .eq. 0) then
+            write(6,)'accuracy was reached = ', error
+                do c_1 = 1, n1
+                   write(6,)'X = ',c_1,' = ',X(c_1)
+                enddo
+          endif
+
+1001         call MPI_FINALIZE(ERR)
+end
