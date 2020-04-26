@@ -23,6 +23,7 @@ read(10,*)n1
 read(10,*)m1
 
 allocate(A(n1,m1), C(n1,m1), D(n1,m1)) !Core_0
+allocate(X_0(n1))
 
 do i=1,n1
     read(10,*)(A(i,j), j=1,n1)
@@ -132,7 +133,8 @@ endif
  enddo
  enddo
                                                                                        !|
-else !65 74                                                                                            !|
+else !65 74
+  allocate(X_0(n1))                                                                                          !|
   allocate(g_0(MBAND(RANK+1))) !COL                                                                    !|
   allocate(iBAND(MBAND(RANK+1),m1))          ! ne 0                                                    !|
     CALL MPI_RECV(iBAND,MBAND(RANK+1)*m1,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR)
@@ -152,7 +154,8 @@ endif !65
 
   do iter = 1,20 !raws   -----ITER C
     allocate(X_1(MBAND(RANK+1)))
-    CALL MPI_BCAST(X_0,  n1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ERR)
+    CALL MPI_BCAST(X_0, n1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ERR)
+    write(6,*)'BCAST', rank
     err_0 = 0.d0
     error = 0.d0
 
