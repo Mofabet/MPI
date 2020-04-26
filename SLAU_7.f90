@@ -85,7 +85,7 @@ CALL MPI_BCAST(eps, 1, MPI_REAL, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ERR)
 !!!
  !---
-allocate(g(n1),X_0(n1))
+!allocate(g(n1),X_0(n1))
 !allocate(g_0(MBAND(RANK+1)))
 
 if (RANK .eq. 0) then
@@ -101,7 +101,7 @@ if (RANK .eq. 0) then
       enddo
     enddo
       !send& и нужен деалок
-      call MPI_SEND(iBAND, MBAND(c_1+1)*m1,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)
+      call MPI_SEND(iBAND, MBAND(c_1+1)*m1,MPI_DOUBLE_PRECISION,c_1,20+RANK+c_1,MPI_COMM_WORLD,ERR)
       call MPI_SEND(g_0, MBAND(c_1),MPI_DOUBLE_PRECISION, c_1, 30+RANK+c_1, MPI_COMM_WORLD, ERR) !-----
       deallocate (iBAND, g_0)!---
       !duck_2 = duck_2 + 1
@@ -180,7 +180,7 @@ endif !65
     enddo
     deallocate(X_1)
   else
-    call MPI_SEND(X_1,MBAND(RANK+1),MPI_DOUBLE_PRECISION,0,40 + RANK + 100*iter,MPI_COMM_WORLD,ERR)
+    call MPI_SEND(X_1,MBAND(RANK + 1),MPI_DOUBLE_PRECISION,0,40 + RANK + 100*iter,MPI_COMM_WORLD,ERR)
     deallocate(X_1)
   endif
 
