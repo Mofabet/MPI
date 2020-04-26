@@ -23,8 +23,9 @@ read(10,*)n1
 read(10,*)m1
 
 allocate(A(n1,m1), C(n1,m1), D(n1,m1)) !Core_0
+endif
 allocate(X_0(n1),X(n1))
-
+if (RANK .eq. 0) then
 do i=1,n1
     read(10,*)(A(i,j), j=1,n1)
 enddo
@@ -132,7 +133,7 @@ endif
  enddo
                                                                                        !|
 else !65 74
-  allocate(X_0(n1),X(n1))                                                                                          !|
+!  allocate(X_0(n1),X(n1))     !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!                                                                                     !|
   allocate(g_0(MBAND(RANK+1))) !COL                                                                    !|
   allocate(iBAND(MBAND(RANK+1),m1))          ! ne 0                                                    !|
     CALL MPI_RECV(iBAND,MBAND(RANK+1)*m1,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR)       !|
@@ -198,9 +199,9 @@ endif !65
     enddo
     deallocate(X_1)
   enddo
-!  do c_4 = 1, n1
-!   X(c_4) = X_0(c_4)
-!  enddo
+  do c_4 = 1, n1
+   X(c_4) = X_0(c_4)
+  enddo
 
 
 
@@ -224,7 +225,7 @@ enddo
 if (RANK .eq. 0) then
             write(6,*)'Max number of iter was reached = ', error
                 do c_1 = 1, n1
-                   write(6,*)'X = ',c_1,' = ',X_0(c_1)
+                   write(6,*)'X = ',c_1,' = ',X(c_1)
                 enddo
           endif
          goto 1001
@@ -233,7 +234,7 @@ if (RANK .eq. 0) then
 1000     if (RANK .eq. 0) then
             write(6,*)'accuracy was reached = ', error
                 do c_1 = 1, n1
-                   write(6,*)'X = ',c_1,' = ',X_0(c_1)
+                   write(6,*)'X = ',c_1,' = ',X(c_1)
                 enddo
           endif
 
