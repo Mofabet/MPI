@@ -22,7 +22,7 @@ open(10, file = 'A', form = 'formatted', status = 'unknown')
 read(10,*)n1
 read(10,*)m1
 
-allocate(A(n1,m1), B(n1,m1), C(n1,m1), D(n1,m1), E(n1,m1)) !Core_0
+allocate(A(n1,m1), C(n1,m1), D(n1,m1)) !Core_0
 
 do i=1,n1
     read(10,*)(A(i,j), j=1,n1)
@@ -34,6 +34,7 @@ read(10,*)m2 !=1
 
 !allocate(A(n1,m1), B(n2,m2))
   !???
+  allocate(B(n2,m2), g(n2))
 
   do i=1,n2
       read(10,*)(B(i,j), j=1,m2)
@@ -41,29 +42,36 @@ read(10,*)m2 !=1
 
   ! A*x=b
   !x=bx+g
+  C(:,:) = 0.d0
+  do i = 1, n1
+    C(i,i)=1/A(i,i)
+  enddo
+
   do i = 1,n1
     do j = 1,m1
           C(i,j)=A(i,j)/A(i,i) !poluchaem obrat-yu
+          g(i)=B(i,1)/A(i,i)
       enddo
   enddo
 
   D= -C
+  X_0 = g
 
   do i = 1, n1
-    do j = 1, m1
-      D(i,i) = D(i,i)+1.d0
+    !do j = 1, m1
+      D(i,i) = D(i,i) + 1.d0
     !X_0
+  !enddo
   enddo
-  enddo
-!allocate(MBAND(SIZE))
+!allocate(MBAND(SIZE))-----------------------
   MBAND(:) = N1/SIZE
 
   do i = 1, mod(n1, SIZE)
-      MBAND(i) = MBAND(i)+1
+      MBAND(i) = MBAND(i) + 1
   enddo
   disp(1) = 0
   do c_1 =2,SIZE
-      disp(c_1) = disp(c_1-1)+MBAND(c_1-1)-1
+      disp(c_1) = disp(c_1 - 1) + MBAND(c_1 - 1)
   enddo
 !  disp = MBAND(1)-1 !пока 1
 endif ! 16
@@ -77,7 +85,7 @@ CALL MPI_BCAST(eps, 1, MPI_REAL, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ERR)
 !!!
  !---
-allocate(g(n1))
+allocate(g(n1),X_0(n1))
 !allocate(g_0(MBAND(RANK+1)))
 
 if (RANK .eq. 0) then
@@ -192,6 +200,7 @@ endif !65
   enddo
 
 
+
 !    do c_3 = 1, SIZE-1
 !       allocate(tmp_alloc(MBAND(c_3)))
 !             do c_4 = 1,MBAND(c_3)
@@ -205,7 +214,7 @@ endif !65
 !  call MPI_BCAST(X,m1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ERR)
 !  call MPI_BCAST(error,1,MPI_DOUBLE_PRECISION,0,MPI_COMM_WORLD,ERR)
   if(error .lt. eps) goto 1000
-
+enddo
 !ccc                                                                        !ccc
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
