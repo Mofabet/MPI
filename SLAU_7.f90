@@ -107,6 +107,7 @@ if (RANK .eq. 0) then
       !duck_2 = duck_2 + 1
       !write(6,*),duck_2,RANK
   enddo !68 79
+endif
   !allocate(iBAND(:,:)) !0
 !--------------------------------------------------------------
   !  do c_1 = 1, SIZE-1
@@ -142,7 +143,6 @@ endif !65
 !allocate(X_0(:,:)) !все?
 !allocate(X_0(m1))
 !X_0=0.d0
-
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !ccc                                                                        !ccc
 
@@ -225,4 +225,4 @@ enddo
                 enddo
               endif
          call MPI_FINALIZE(ERR)
-         end
+     end
