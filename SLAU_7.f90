@@ -192,7 +192,7 @@ endif !65
   if(RANK .ne. 0) then
     do c_2 = 1, SIZE - 1
       allocate(X_1(MBAND(c_2 + 1)))
-      call MPI_RECV(X_1, MBAND(c_2 + 1),MPI_DOUBLE_PRECISION,c_2,40 + c_2 + 100*iter,MPI_COMM_WORLD,ERR)
+      call MPI_RECV(X_1, MBAND(c_2 + 1),MPI_DOUBLE_PRECISION,c_2,40 + c_2 + 100*iter,MPI_COMM_WORLD, ST, ERR)
       write(6,*)'RECV_3', rank
 
     !error = sqrt(error)
