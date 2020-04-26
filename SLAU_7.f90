@@ -88,7 +88,7 @@ if (RANK .eq. 0) then
     allocate(iBAND(MBAND(c_1+1),m1))
     do c_2 = 1, MBAND(c_1)!m     !do c_1 = 1,iBAND
       do c_3 = 1, m1
-          iBAND(c_2,c_3) = E(disp(с_1 + 1) + c_2 - 1, c_3) !заполнение, c_1 i+j
+          iBAND(c_2,c_3) = E(disp(c_1 + 1) + c_2 - 1, c_3) !заполнение, c_1 i+j
       enddo
     enddo
       !send& и нужен деалок

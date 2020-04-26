@@ -15,9 +15,28 @@ if (RANK .eq. 0) then
   write(6,*)'Точность'
   read(*,*)eps
 
-  open(10, file = 'A', form = 'formatted', status = 'unknown')
-  read(10,*)n1
-  read(10,*)m1
+  write(6,*) 'Input number of lines:'
+  read(*,*)n
+  write(6,*) 'Input number of columns:'
+  read(*,*)m
+  allocate(tm(n,m))
+  tm(:,:)=0.d0
+  write(6,*) 'Input temperatures on 4 corners'
+  write(6,*) 'Upper left:'
+  read(*,*) tm(1,1)
+  write(6,*) 'Upper right:'
+  read(*,*) tm(1,m)
+  write(6,*) 'Lower left:'
+  read(*,*) tm(n,1)
+  write(6,*) 'Lower right:'
+  read(*,*) tm(n,m)
+
+  write(6,*) 'iterrations ='
+  read(*,*) iter
+
+  !open(10, file = 'A', form = 'formatted', status = 'unknown')
+  !read(10,*)n1
+  !read(10,*)m1
 
   allocate(A(n,m))
 
@@ -32,26 +51,18 @@ if (RANK .eq. 0) then
   enddo
 
   MBAND(1) = disp(1) + 1
-  MBAND(SIZE) = disp(SIZE) + 1
+  !MBAND(SIZE) = disp(SIZE) + 1
 
   do c_1 = 2, SIZE - 1
       MBAND(i) = disp(i) + 2
   enddo
-endif
-
-
-  CALL MPI_BCAST(n, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
-  CALL MPI_BCAST(m, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
-  CALL MPI_BCAST(eps, 1, MPI_REAL, 0, MPI_COMM_WORLD, ERR)
-  CALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD,ERR)
-
-  if (RANK .eq. 0) then
+!-------------------------------------B----------------------------------------!
     do c_1 = 1, SIZE - 1
       int = MBAND(i + 1)
       allocate(iBAND(MBAND(c_1+1),m1))
       do c_2 = 1, MBAND(c_1)!m     !do c_1 = 1,iBAND
         do c_3 = 1, m1
-            iBAND(c_2,c_3) = E(disp(с_1 + 1) + c_2 - 1, c_3) !заполнение, c_1 i+j
+            iBAND(c_2,c_3) = E(disp(c_1 + 1) + c_2 - 1, c_3) !заполнение, c_1 i+j
         enddo
       enddo
 
@@ -60,7 +71,15 @@ endif
       !duck_2 = duck_2 + 1
       !write(6,*),duck_2,RANK
   enddo !68 79
+endif
 
+CALL MPI_BCAST(n, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
+CALL MPI_BCAST(m, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
+CALL MPI_BCAST(eps, 1, MPI_REAL, 0, MPI_COMM_WORLD, ERR)
+CALL MPI_BCAST(iter,1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
+CALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD,ERR)
+
+if (RANK .eq. 0) then
   int = MBAND(1)
   allocate(iBAND(n,int))
   do c_1 = 1, n
@@ -69,14 +88,17 @@ endif
     enddo
   enddo
 
+
   !do
   !enddo
-else
+else !----------------
   int = MBAND(RANK + 1)
   CALL MPI_RECV(iBAND, int*n,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR)
   endif
 
-  
+
+
+
       CALL MPI_SENDRECV(x(:,2), n, MPI_DOUBLE_PRECISION, left,(RANK)+(k*k+k)*99, &
       band(:,q), n, MPI_DOUBLE_PRECISION, right, &
       (RANK+1)+(k*k+k)*99, MPI_COMM_WORLD, ST, ERR)
@@ -87,3 +109,7 @@ else
 
       CALL MPI_ALLREDUCE(error, sumerr, 1, MPI_REAL, MPI_SUM, MPI_COMM_WORLD, ERR)
       sumerr = sqrt(sumerr)
+
+
+      call MPI_FINALIZE(ERR)
+      end
