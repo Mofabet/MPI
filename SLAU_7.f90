@@ -167,17 +167,15 @@ endif !65
 
   !duck_1 = duck_1 + 1
   !write(6,*),duck_1,RANK
+   !-----------------ERR
   do c_1 = 1 , MBAND(RANK+1)
-    write(6,*)'ERROR1 = ', err_0
      err_0 = err_0 + ((X_1(c_1)-X_0(c_1 + disp(RANK+1)))**2)
-     write(6,*)'ERROR2 = ', err_0
   enddo
+  !-----------------------
 !MPI_REDUCE(SBUF, RBUF, COUNT, DATATYPE, OP, ROOT, COMM, IERR)
 !C-C-C
   call MPI_ALLREDUCE(err_0, error, 1, MPI_DOUBLE_PRECISION, MPI_SUM, MPI_COMM_WORLD,ERR)
-  write(6,*)'ERROR3 = ', error
   error = sqrt(error)
-write(6,*)'ERROR4 = ', error
   if(RANK .eq. 0) then
     write(6,*)'ERROR = ', error
     do c_1 = 1, MBAND(1)
