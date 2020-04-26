@@ -193,7 +193,7 @@ endif !65
 
     !error = sqrt(error)
     do c_3 = 1, MBAND(c_2 + 1) !???
-       X_0(c_2 + disp(c_2 + 1)) = X_1(c_3)
+       X_0(c_3 + disp(c_2 + 1)) = X_1(c_3)
     enddo
     deallocate(X_1)
   enddo
