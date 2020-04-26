@@ -151,8 +151,8 @@ endif !65
   do iter = 1,20 !raws   -----ITER C
     allocate(X_1(MBAND(RANK+1)))
     CALL MPI_BCAST(X_0, n1, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, ERR)
-    err_0 = 0.d0
-    error = 0.d0
+    err_0 = 0
+    error = 0
 
    do c_1 = 1 , MBAND(RANK+1)
       tmp = 0.d0
@@ -169,7 +169,7 @@ endif !65
   !write(6,*),duck_1,RANK
    !-----------------ERR
   do c_1 = 1 , MBAND(RANK+1)
-     err_0 = err_0 + ((X_1(c_1)-X_0(c_1 + disp(RANK+1)))**2)
+    err_0 = err_0 + ((X_1(c_1)-X_0(c_1 + disp(RANK+1)))**2)
   enddo
   !-----------------------
 !MPI_REDUCE(SBUF, RBUF, COUNT, DATATYPE, OP, ROOT, COMM, IERR)
@@ -198,9 +198,9 @@ endif !65
     enddo
     deallocate(X_1)
   enddo
-  do c_4 = 1, n1
-   X(c_4) = X_0(c_4)
-  enddo
+!  do c_4 = 1, n1
+!   X(c_4) = X_0(c_4)
+!  enddo
 
 
 
@@ -224,7 +224,7 @@ enddo
 if (RANK .eq. 0) then
             write(6,*)'Max number of iter was reached = ', error
                 do c_1 = 1, n1
-                   write(6,*)'X = ',c_1,' = ',X(c_1)
+                   write(6,*)'X = ',c_1,' = ',X_0(c_1)
                 enddo
           endif
          goto 1001
@@ -233,7 +233,7 @@ if (RANK .eq. 0) then
 1000     if (RANK .eq. 0) then
             write(6,*)'accuracy was reached = ', error
                 do c_1 = 1, n1
-                   write(6,*)'X = ',c_1,' = ',X(c_1)
+                   write(6,*)'X = ',c_1,' = ',X_0(c_1)
                 enddo
           endif
 
