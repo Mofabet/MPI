@@ -23,10 +23,6 @@ open(10, file = 'A', form = 'formatted', status = 'unknown')
 read(10,*)n1
 read(10,*)m1
 
-write(6,*)'Matrix A = '
-do c_1 = 1, n1
-write(6,'(100f8.3)')(A(c_1, c_2), c_2 =1, m1)
-enddo
 
 allocate(A(n1,m1), C(n1,m1), D(n1,m1)) !Core_0
 allocate(X_0(n1),X(n1))
@@ -35,14 +31,15 @@ do i=1,n1
     read(10,*)(A(i,j), j=1,n1)
 enddo
 
+write(6,*)'Matrix A = '
+do c_1 = 1, n1
+  write(6,'(100f8.3)')(A(c_1, c_2), c_2 =1, m1)
+enddo
+
 open(10, file = 'B', form = 'formatted', status = 'unknown')
 read(10,*)n2 !=n1
 read(10,*)m2 !=1
 
-write(6,*)'Vector B = '
-do c_1 = 1, n2
-write(6,'(100f8.3)')(B(c_1, c_2), c_2 =1, m2)
-write(6,*)'--------------------------------------------------------------------'
 enddo
 
 
@@ -53,6 +50,11 @@ enddo
   do i=1,n2
       read(10,*)(B(i,j), j=1,m2)
   enddo
+
+  write(6,*)'Vector B = '
+  do c_1 = 1, n2
+    write(6,'(100f8.3)')(B(c_1, c_2), c_2 =1, m2)
+    write(6,*)'--------------------------------------------------------------------'
 
   ! A*x=b
   !x=bx+g
@@ -76,6 +78,17 @@ enddo
       D(i,i) = D(i,i) + 1.d0
     !X_0
   !enddo
+  enddo
+
+  write(6,*)'Matrix B = '
+  do c_1 = 1, n1
+  write(6,'(100f8.3)')(D(c_1, c_2), c_2 =1, m1)
+  enddo
+
+  write(6,*)'Vector G = '
+  do c_1 = 1, n2
+  write(6,'(100f8.3)')g(c_1)
+  write(6,*)'--------------------------------------------------------------------'
   enddo
 !allocate(MBAND(SIZE))-----------------------
   MBAND(:) = N1/SIZE
