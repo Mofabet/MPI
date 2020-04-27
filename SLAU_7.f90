@@ -15,12 +15,18 @@ call MPI_COMM_RANK(MPI_COMM_WORLD, RANK, ERR)
 allocate(MBAND(SIZE),disp(SIZE))
 
 if (RANK .eq. 0) then
-  write (6,*)'Eps'
+  write (6,*)'Initialization of the program'
+  write (6,*)'Enter the required accuracy:'
   read(*,*)Eps
 
 open(10, file = 'A', form = 'formatted', status = 'unknown')
 read(10,*)n1
 read(10,*)m1
+
+write(6,*)'Matrix A = '
+do c_1 = 1, n1
+write(6,'(100f8.3)')(A(c_1, c_2), c_2 =1, m1)
+enddo
 
 allocate(A(n1,m1), C(n1,m1), D(n1,m1)) !Core_0
 allocate(X_0(n1),X(n1))
@@ -32,6 +38,13 @@ enddo
 open(10, file = 'B', form = 'formatted', status = 'unknown')
 read(10,*)n2 !=n1
 read(10,*)m2 !=1
+
+write(6,*)'Vector B = '
+do c_1 = 1, n2
+write(6,'(100f8.3)')(B(c_1, c_2), c_2 =1, m2)
+write(6,*)'--------------------------------------------------------------------'
+enddo
+
 
 !allocate(A(n1,m1), B(n2,m2))
   !???
@@ -223,6 +236,7 @@ enddo
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
 if (RANK .eq. 0) then
+write(6,*)'--------------------------------------------------------------------'
             write(6,*)'Max number of iter was reached = ', error
                 do c_1 = 1, n1
                    write(6,*)'X = ',c_1,' = ',X(c_1)
@@ -232,6 +246,7 @@ if (RANK .eq. 0) then
 
 
 1000     if (RANK .eq. 0) then
+write(6,*)'--------------------------------------------------------------------'
             write(6,*)'accuracy was reached = ', error
                 do c_1 = 1, n1
                    write(6,*)'X = ',c_1,' = ',X(c_1)
