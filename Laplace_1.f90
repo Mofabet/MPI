@@ -44,17 +44,17 @@ if (RANK .eq. 0) then
       read(10,*)(A(i,j), j=1,m)
   enddo
 
-  MBAND(:) = N1/SIZE
+  disp(:) = N1/SIZE
 
   do i = 1, mod(m, SIZE)
       disp(i) = disp(i)+1
   enddo
 
-  MBAND(1) = disp(1) + 1
+  row(:) = disp(:) + 1
   !MBAND(SIZE) = disp(SIZE) + 1
 
   do c_1 = 2, SIZE - 1
-      MBAND(i) = disp(i) + 2
+      row(i) = row(i) + 2
   enddo
 !-------------------------------------B----------------------------------------!
     do c_1 = 1, SIZE - 1
@@ -62,7 +62,7 @@ if (RANK .eq. 0) then
       allocate(iBAND(MBAND(c_1+1),m1))
       do c_2 = 1, MBAND(c_1)!m     !do c_1 = 1,iBAND
         do c_3 = 1, m1
-            iBAND(c_2,c_3) = E(disp(c_1 + 1) + c_2 - 1, c_3) !заполнение, c_1 i+j
+            iBAND(c_2,c_3) = E(c_1+c_2, c_3) !заполнение, c_1 i+j
         enddo
       enddo
 
@@ -78,6 +78,7 @@ CALL MPI_BCAST(m, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(eps, 1, MPI_REAL, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(iter,1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD,ERR)
+allocate(row(np))
 
 if (RANK .eq. 0) then
   int = MBAND(1)
