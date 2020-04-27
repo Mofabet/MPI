@@ -40,7 +40,6 @@ open(10, file = 'B', form = 'formatted', status = 'unknown')
 read(10,*)n2 !=n1
 read(10,*)m2 !=1
 
-enddo
 
 
 !allocate(A(n1,m1), B(n2,m2))
@@ -55,6 +54,7 @@ enddo
   do c_1 = 1, n2
     write(6,'(100f8.3)')(B(c_1, c_2), c_2 =1, m2)
     write(6,*)'--------------------------------------------------------------------'
+  enddo
 
   ! A*x=b
   !x=bx+g
