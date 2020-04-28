@@ -128,7 +128,7 @@ CALL MPI_BCAST(row, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, err)
 !ALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD,ERR)
 !allocate(row(SIZE))
 
-!if (RANK .eq. 0) then
+if (RANK .eq. 0) then
   int = row(1)
   allocate(iBAND(int,m)) !tut tozhe ne ponyatno nm int 1 ili 2 s por-m...
   do c_1 = 1, int
@@ -143,7 +143,7 @@ CALL MPI_BCAST(row, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, err)
 else !----------------
   int = row(RANK + 1)
   allocate(iBAND(int,m), t(int,m))
-  CALL MPI_RECV(iBAND, int*n,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR) !т/т
+  CALL MPI_RECV(iBAND, int*m,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR) !т/т
   endif
 
   !http://www2.sscc.ru/Publikacii/Primery_Prll/1-4.htm
@@ -160,7 +160,7 @@ else !----------------
     bottom = RANK + 1
   endif
 
-  t = iBAND
+  T = iBAND
 
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 !ccc                                                                        !ccc
@@ -173,7 +173,7 @@ int = row(RANK + 1)
 
 do c_1 = 2, (int - 1)
   do c_2 = 2, (m - 1)          !  1                    2                      3                    4
-    t(c_1,c_2) = ((iBAND(c_1 - 1,c_2) + iBAND(c_1 + 1,c_2) + iBAND(c_1,c_2 - 1) + iBAND(c_1,c_2 + 1))/4)
+    T(c_1,c_2) = ((iBAND(c_1 - 1,c_2) + iBAND(c_1 + 1,c_2) + iBAND(c_1,c_2 - 1) + iBAND(c_1,c_2 + 1))/4)
     err_0 = err_0 + (t(c_1,c_2) - iBAND(c_1,c_2))**2
   enddo
 enddo
@@ -196,7 +196,7 @@ enddo !и что? 164 строка, но просит завершения
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 2000 continue
 
-write(6,*)'Band on',rank,' = ', iBAND
+write(6,*)'Band on',RANK,' = ', iBAND
 
 if (RANK .eq. 0) then
   allocate(out(n,m))
