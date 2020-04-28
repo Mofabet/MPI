@@ -212,7 +212,7 @@ else
 endif
 
 if (RANK .eq. 0) then
-  s = disp (1)
+  duck_1 = disp (1)
   do c_1 = 1,SIZE-1
     if (c_1 .eq. (SIZE - 1)) then
       mrbin = 0
