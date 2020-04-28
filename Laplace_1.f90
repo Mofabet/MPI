@@ -98,7 +98,7 @@ allocate(disp(SIZE))
 !-------------------------------------B----------------------------------------!
 duck_1 = disp(1)-2
     do c_1 = 1, SIZE - 1
-      NE_INT = row(i + 1)
+      NE_INT = row(с_1 + 1)
       allocate(iBAND(NE_INT,m))
       do c_2 = 1, NE_INT!m     !do c_1 = 1,iBAND
         do c_3 = 1, m
