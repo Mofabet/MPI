@@ -115,6 +115,8 @@ duck_1 = disp(1)-2
       !duck_2 = duck_2 + 1
       !write(6,*),duck_2,RANK
   enddo !68 79
+else
+  allocate(row(SIZE))
 endif
 
 CALL MPI_BCAST(n, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
@@ -123,9 +125,9 @@ CALL MPI_BCAST(eps, 1, MPI_REAL, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(iterrations,1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(row, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, err)
 !ALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD,ERR)
-allocate(row(SIZE))
+!allocate(row(SIZE))
 
-if (RANK .eq. 0) then
+!if (RANK .eq. 0) then
   int = row(1)
   allocate(iBAND(int,m)) !tut tozhe ne ponyatno nm int 1 ili 2 s por-m...
   do c_1 = 1, int
