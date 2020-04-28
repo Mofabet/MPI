@@ -181,11 +181,11 @@ enddo
 
 iBAND = T
 
-CALL MPI_SENDRECV(T(2,:), m, MPI_DOUBLE_PRECISION, top, 10**6 + 1000*RANK + iter, & !тег надо заменить, если лимит будет привышен
-iBAND(int, :), m, MPI_DOUBLE_PRECISION, bottom, 10**6 + 1000*(RANK + 1) + iter, & !можно повысить степень ранка, а ост оставить
+CALL MPI_SENDRECV(T(2,:), m, MPI_DOUBLE_PRECISION, top, RANK+(iter*(iter + 100)+iter), & !тег надо заменить, если лимит будет привышен
+iBAND(int, :), m, MPI_DOUBLE_PRECISION, bottom, (RANK + 1)+(iter*(iter + 100)+iter), & !можно повысить степень ранка, а ост оставить
 MPI_COMM_WORLD, ST, ERR)
-CALL MPI_SENDRECV(T(int - 1,:), m, MPI_DOUBLE_PRECISION, bottom,  2*10**6 + 1000*RANK + iter, &
-IBAND(1,:), m,MPI_DOUBLE_PRECISION,top,  2*10**6 + 1000*(RANK - 1) + iter, &
+CALL MPI_SENDRECV(T(int - 1,:), m, MPI_DOUBLE_PRECISION, bottom,  RANK+(iter*(iter+999)+iter), &
+IBAND(1,:), m,MPI_DOUBLE_PRECISION,top,  (RANK - 1)+(iter*(iter + 999)+iter), &
 MPI_COMM_WORLD, ST, ERR)
 
 CALL MPI_ALLREDUCE(err_0, error, 1, MPI_REAL, MPI_SUM, MPI_COMM_WORLD, ERR)
