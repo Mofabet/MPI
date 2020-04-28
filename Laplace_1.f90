@@ -3,12 +3,12 @@ program Laplace
   implicit none
   include 'mpif.h'
   INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
-  integer :: i, j, n, m, s, c_1, c_2, c_3, k, c, duck_1, duck_2, iter, iterrations
-  integer, allocatable ::  MBAND(:),
+  integer :: i, j, n, m, s, c_1, c_2, c_3, k, top, bottom, iter, iterrations
+  integer, allocatable ::  MBAND(:)
   real :: eps, err_0, error, dt1, dt2, mrbin
   double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), iBAND(:,:)
   double precision, allocatable :: tm(:,:), t(:,:), out(:,:), g_0(:), row(:), disp(:)
-  double precision :: tmp, err_0, error
+  double precision :: tmp
 
 call MPI_INIT(ERR)
 call MPI_COMM_SIZE(MPI_COMM_WORLD, SIZE, ERR)
@@ -97,8 +97,8 @@ allocate(disp(SIZE))
 !  write(6,*)'row = ', row
 !-------------------------------------B----------------------------------------!
     do c_1 = 1, SIZE - 1
-      int = MBAND(i + 1)
-      allocate(iBAND(int,m1))
+      int = row(i + 1)
+      allocate(iBAND(int,m))
       do c_2 = 1, int!m     !do c_1 = 1,iBAND
         do c_3 = 1, m
             iBAND(c_2,c_3) = tm(c_1+c_2+disp(1)-2, c_3) !заполнение, c_1 i+j
@@ -121,11 +121,11 @@ CALL MPI_BCAST(m, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(eps, 1, MPI_REAL, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(iterrations,1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(row, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, err)
-CALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD,ERR)
-allocate(row(np))
+!ALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD,ERR)
+allocate(row(SIZE))
 
 if (RANK .eq. 0) then
-  int = MBAND(1)
+  int = row(1)
   allocate(iBAND(int,m)) !tut tozhe ne ponyatno nm int 1 ili 2 s por-m...
   do c_1 = 1, int
     do c_2 = 1, m
@@ -137,7 +137,7 @@ if (RANK .eq. 0) then
   !do
   !enddo
 else !----------------
-  int = MBAND(RANK + 1)
+  int = row(RANK + 1)
   allocate(iBAND(int,m), t(int,m))
   CALL MPI_RECV(iBAND, int*n,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR) !т/т
   endif
@@ -151,9 +151,9 @@ else !----------------
   endif
 
   if (RANK .eq. 1) then
-    botton = MPI_PROC_NULL                         !NIZ-KARNIZ
+    bottom = MPI_PROC_NULL                         !NIZ-KARNIZ
   else
-    botton = RANK + 1
+    bottom = RANK + 1
   endif
 
   t = iBAND
@@ -167,8 +167,8 @@ error = 0
 
 int = row(RANK + 1)
 
-do c_1 = 2, int - 1
-  do c_2, m - 1          !  1                    2                      3                    4
+do c_1 = 2, (int - 1)
+  do c_2, (m - 1)          !  1                    2                      3                    4
     t(c_1,c_2) = (iBAND(c_1 - 1,c_2) + iBAND(c_1 + 1,c_2) + iBAND(c_1,c_2 - 1) + iBAND(c_1,c_2 + 1))/4
     err_0 = err_0 + (t(c_1,c_2) - iBAND(c_1,c_2))**2
   enddo
@@ -177,20 +177,20 @@ enddo
 iBAND = t
 
 CALL MPI_SENDRECV(t(2,:), m, MPI_DOUBLE_PRECISION, top, 10**6 + 1000*RANK + iter), & !тег надо заменить, если лимит будет привышен
-iBAND(int, :), m, MPI_DOUBLE_PRECISION, bottom, 10**6 + 1000*(RANK + 1) + iter), & !можно повысить степень ранка, а ост оставить
+iBAND(int, :), m, MPI_DOUBLE_PRECISION, bottom, 10**6 + 1000*(RANK + 1) + iter, & !можно повысить степень ранка, а ост оставить
 MPI_COMM_WORLD, ST, ERR)
 CALL MPI_SENDRECV(t(int - 1,:), m, MPI_DOUBLE_PRECISION, bottom,  2*10**6 + 1000*RANK + iter), &
-IBAND(1,:), m,MPI_DOUBLE_PRECISION,top,  2*10**6 + 1000*(RANK - 1) + iter), &
+IBAND(1,:), m,MPI_DOUBLE_PRECISION,top,  2*10**6 + 1000*(RANK - 1) + iter, &
 MPI_COMM_WORLD, ST, ERR)
 
 CALL MPI_ALLREDUCE(err_0, error, 1, MPI_REAL, MPI_SUM, MPI_COMM_WORLD, ERR)
 error=sqrt(error)
 
-  if(error .lt. eps) exit !почему экзит не робит?
+  if(error .lt. eps) goto 2000 !почему экзит не робит?
 enddo
-
 !ccc                                                                        !ccc
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+2000 continue
 
 write(6,*)'Band on',rank,' = ', iBAND
 
@@ -203,7 +203,7 @@ if (RANK .eq. 0) then
   enddo
 deallocate(iBAND)
 else
-  call MPI_SEND(iBAND, int*m, MPI_DOUBLE_PRECISION, 0 RANK + 1, MPI_COMM_WORLD, ERR)
+  call MPI_SEND(iBAND, int*m, MPI_DOUBLE_PRECISION, 0, 10+RANK, MPI_COMM_WORLD, ERR)
 endif
 
 if (RANK .eq. 0) then
@@ -216,7 +216,7 @@ if (RANK .eq. 0) then
     endif
     int = row (c_1 + 1)
     allocate(iBAND(c,m))
-    CALL MPI_RECV(iBAND, int*m, MPI_DOUBLE_PRECISION, c_1, c_1+1, MPI_COMM_WORLD, ST, ERR)
+    CALL MPI_RECV(iBAND, int*m, MPI_DOUBLE_PRECISION, c_1, 10+c_1, MPI_COMM_WORLD, ST, ERR)
     do c_2 = 2, int - mrbin
       do c_3 = 1, m
         out(c_2 + s - 1, c_3) = iBAND(c_2,c_3)
