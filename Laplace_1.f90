@@ -165,9 +165,9 @@ do iter = 1, iterrations
 err_0 = 0
 error = 0
 
-c = row(RANK + 1)
+int = row(RANK + 1)
 
-do c_1 = 2, c - 1
+do c_1 = 2, int - 1
   do c_2, m - 1          !  1                    2                      3                    4
     t(c_1,c_2) = (iBAND(c_1 - 1,c_2) + iBAND(c_1 + 1,c_2) + iBAND(c_1,c_2 - 1) + iBAND(c_1,c_2 + 1))/4
     err_0 = err_0 + (t(c_1,c_2) - iBAND(c_1,c_2))**2
@@ -177,9 +177,9 @@ enddo
 iBAND = t
 
 CALL MPI_SENDRECV(t(2,:), m, MPI_DOUBLE_PRECISION, top, 10**6 + 1000*RANK + iter), & !тег надо заменить, если лимит будет привышен
-iBAND(c, :), m, MPI_DOUBLE_PRECISION, bottom, 10**6 + 1000*(RANK + 1) + iter), & !можно повысить степень ранка, а ост оставить
+iBAND(int, :), m, MPI_DOUBLE_PRECISION, bottom, 10**6 + 1000*(RANK + 1) + iter), & !можно повысить степень ранка, а ост оставить
 MPI_COMM_WORLD, ST, ERR)
-CALL MPI_SENDRECV(t(c-1,:), m, MPI_DOUBLE_PRECISION, bottom,  2*10**6 + 1000*RANK + iter), &
+CALL MPI_SENDRECV(t(int - 1,:), m, MPI_DOUBLE_PRECISION, bottom,  2*10**6 + 1000*RANK + iter), &
 IBAND(1,:), m,MPI_DOUBLE_PRECISION,top,  2*10**6 + 1000*(RANK - 1) + iter), &
 MPI_COMM_WORLD, ST, ERR)
 
@@ -196,14 +196,14 @@ write(6,*)'Band on',rank,' = ', iBAND
 
 if (RANK .eq. 0) then
   allocate(out(n,m))
-  do c_1 = 1, c - 1 !perenos
+  do c_1 = 1, int - 1 !perenos
     do c_2 = 1, m
       out(c_1,c_2) = iBAND (c_1,c_2)
     enddo
   enddo
 deallocate(iBAND)
 else
-  call MPI_SEND(iBAND, c*m, MPI_DOUBLE_PRECISION, 0 RANK + 1, MPI_COMM_WORLD, ERR)
+  call MPI_SEND(iBAND, int*m, MPI_DOUBLE_PRECISION, 0 RANK + 1, MPI_COMM_WORLD, ERR)
 endif
 
 if (RANK .eq. 0) then
