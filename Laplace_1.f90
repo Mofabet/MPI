@@ -39,7 +39,7 @@ if (RANK .eq. 0) then
   write(6,*) 'Number of iterrations ='
   read(*,*) iterrations
 write(6,*)'--------------------------------------------------------------------'
-
+endif
   !open(10, file = 'A', form = 'formatted', status = 'unknown')
   !read(10,*)n1
   !read(10,*)m1
@@ -49,7 +49,7 @@ write(6,*)'--------------------------------------------------------------------'
 !  do i=1,n
 !      read(10,*)(A(i,j), j=1,m)
 !  enddo
-
+if (rank.eq.0) then
 
 dt1=(tm(1,m)-tm(1,1))/m
 dt2=(tm(n,m)-tm(n,1))/m
@@ -106,7 +106,7 @@ duck_1 = disp(1)-2
         enddo
       enddo
 !2 3 svobodni
-      call MPI_SEND(iBAND, int*n,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)!mmm*c
+      call MPI_SEND(iBAND, int*m,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)!mmm*c
       write(6,*)'Band on ',c_1,'=='
       do c_2=1, int
         write(6,'(100f8.3)')(iBAND(c_2,c_3),c_3 =1,m)
@@ -115,9 +115,10 @@ duck_1 = disp(1)-2
       !duck_2 = duck_2 + 1
       !write(6,*),duck_2,RANK
   enddo !68 79
-else
-  allocate(row(SIZE))
 endif
+!if (RANK .ne. 0) then
+!  allocate(row(SIZE))
+!endif
 
 CALL MPI_BCAST(n, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(m, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
