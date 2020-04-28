@@ -3,7 +3,7 @@ program Laplace
   implicit none
   include 'mpif.h'
   INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
-  integer :: i, j, n, m, s, c_1, c_2, c_3, k, top, bottom, iter, iterrations
+  integer :: i, j, n, m, s, c_1, c_2, c_3, k, top, bottom, iter, iterrations, int
   integer, allocatable ::  MBAND(:)
   real :: eps, err_0, error, dt1, dt2, mrbin
   double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), iBAND(:,:)
@@ -168,18 +168,18 @@ error = 0
 int = row(RANK + 1)
 
 do c_1 = 2, (int - 1)
-  do c_2, (m - 1)          !  1                    2                      3                    4
-    t(c_1,c_2) = (iBAND(c_1 - 1,c_2) + iBAND(c_1 + 1,c_2) + iBAND(c_1,c_2 - 1) + iBAND(c_1,c_2 + 1))/4
+  do c_2 = 2, (m - 1)          !  1                    2                      3                    4
+    t(c_1,c_2) = ((iBAND(c_1 - 1,c_2) + iBAND(c_1 + 1,c_2) + iBAND(c_1,c_2 - 1) + iBAND(c_1,c_2 + 1))/4)
     err_0 = err_0 + (t(c_1,c_2) - iBAND(c_1,c_2))**2
   enddo
 enddo
 
 iBAND = t
 
-CALL MPI_SENDRECV(t(2,:), m, MPI_DOUBLE_PRECISION, top, 10**6 + 1000*RANK + iter), & !тег надо заменить, если лимит будет привышен
+CALL MPI_SENDRECV(t(2,:), m, MPI_DOUBLE_PRECISION, top, 10**6 + 1000*RANK + iter, & !тег надо заменить, если лимит будет привышен
 iBAND(int, :), m, MPI_DOUBLE_PRECISION, bottom, 10**6 + 1000*(RANK + 1) + iter, & !можно повысить степень ранка, а ост оставить
 MPI_COMM_WORLD, ST, ERR)
-CALL MPI_SENDRECV(t(int - 1,:), m, MPI_DOUBLE_PRECISION, bottom,  2*10**6 + 1000*RANK + iter), &
+CALL MPI_SENDRECV(t(int - 1,:), m, MPI_DOUBLE_PRECISION, bottom,  2*10**6 + 1000*RANK + iter, &
 IBAND(1,:), m,MPI_DOUBLE_PRECISION,top,  2*10**6 + 1000*(RANK - 1) + iter, &
 MPI_COMM_WORLD, ST, ERR)
 
@@ -187,7 +187,7 @@ CALL MPI_ALLREDUCE(err_0, error, 1, MPI_REAL, MPI_SUM, MPI_COMM_WORLD, ERR)
 error=sqrt(error)
 
   if(error .lt. eps) goto 2000 !почему экзит не робит?
-enddo
+enddo !и что? 164 строка, но просит завершения
 !ccc                                                                        !ccc
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 2000 continue
