@@ -3,9 +3,9 @@ program Laplace
   implicit none
   include 'mpif.h'
   INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
-  integer :: i, j, n, m, s, c_1, c_2, c_3, k, top, bottom, iter, iterrations, int
+  integer :: i, j, n, m, s, c_1, c_2, c_3, duck_1, k, top, bottom, iter, iterrations, int, mrbin
   integer, allocatable ::  MBAND(:)
-  real :: eps, err_0, error, dt1, dt2, mrbin
+  real :: eps, err_0, error, dt1, dt2
   double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), iBAND(:,:)
   double precision, allocatable :: tm(:,:), t(:,:), out(:,:), g_0(:), row(:), disp(:)
   double precision :: tmp
@@ -96,12 +96,13 @@ allocate(disp(SIZE))
 
 !  write(6,*)'row = ', row
 !-------------------------------------B----------------------------------------!
+duck_1 = disp(1)-2
     do c_1 = 1, SIZE - 1
       int = row(i + 1)
       allocate(iBAND(int,m))
       do c_2 = 1, int!m     !do c_1 = 1,iBAND
         do c_3 = 1, m
-            iBAND(c_2,c_3) = tm(c_1+c_2+disp(1)-2, c_3) !заполнение, c_1 i+j
+            iBAND(c_2,c_3) = tm(c_1+c_2+ duck_1, c_3) !заполнение, c_1 i+j !!!!!!!!!!!!
         enddo
       enddo
 !2 3 svobodni
@@ -208,7 +209,7 @@ endif
 
 if (RANK .eq. 0) then
   s = disp (1)
-  do c_1 = 1, SIZE - 1
+  do c_1 = 1,SIZE-1
     if (c_1 .eq. (SIZE - 1)) then
       mrbin = 0
     else
@@ -217,7 +218,7 @@ if (RANK .eq. 0) then
     int = row (c_1 + 1)
     allocate(iBAND(int,m))
     CALL MPI_RECV(iBAND, int*m, MPI_DOUBLE_PRECISION, c_1, 10+c_1, MPI_COMM_WORLD, ST, ERR)
-    do c_2 = 2, (int - mrbin)
+    do c_2 = 2, (int - mrbin) !!!!!!!!!!!
       do c_3 = 1, m
         out(c_2 + s - 1, c_3) = iBAND(c_2,c_3)
       enddo
