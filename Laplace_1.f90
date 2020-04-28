@@ -26,8 +26,8 @@ if (RANK .eq. 0) then
   allocate(tm(n,m))
   tm(:,:)=0.d0
   !чочтавим матрицу темп
-  write(6,*) 'Input temperatures on 4 corners'
-  write(6,*) 'Upper left:'
+  write(6,*) 'Input temperatures on 4 corners'        !(1:m)
+  write(6,*) 'Upper left:'                            !(n:1)
   read(*,*) tm(1,1)
   write(6,*) 'Upper right:'
   read(*,*) tm(1,m)
@@ -100,7 +100,7 @@ allocate(disp(SIZE))
       int = MBAND(i + 1)
       allocate(iBAND(int,m1))
       do c_2 = 1, int!m     !do c_1 = 1,iBAND
-        do c_3 = 1, m1
+        do c_3 = 1, m
             iBAND(c_2,c_3) = tm(c_1+c_2+disp(1)-2, c_3) !заполнение, c_1 i+j
         enddo
       enddo
