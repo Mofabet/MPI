@@ -119,7 +119,7 @@ endif
 CALL MPI_BCAST(n, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(m, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(eps, 1, MPI_REAL, 0, MPI_COMM_WORLD, ERR)
-CALL MPI_BCAST(iter,1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
+CALL MPI_BCAST(iterrations,1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(row, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, err)
 CALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD,ERR)
 allocate(row(np))
@@ -216,7 +216,7 @@ if (RANK .eq. 0) then
     endif
     int = row (c_1 + 1)
     allocate(iBAND(c,m))
-    CALL MPI_RECV(iBAND, int*m, MPI_DOUBLE_PRECISION, c_1,c_1+1, MPI_COMM_WORLD, ST, ERR)
+    CALL MPI_RECV(iBAND, int*m, MPI_DOUBLE_PRECISION, c_1, c_1+1, MPI_COMM_WORLD, ST, ERR)
     do c_2 = 2, int - mrbin
       do c_3 = 1, m
         out(c_2 + s - 1, c_3) = iBAND(c_2,c_3)
@@ -228,12 +228,12 @@ if (RANK .eq. 0) then
 
 
 
-if (RANK .eq. 0) then
+!if (RANK .eq. 0) then
 write(6,*)'--------------------------------------------------------------------'
 write(6,*)'ERROR = ', error
-            write(6,*)'Max number of iter was reached = ', error
+        !    write(6,*)'Max number of iter was reached = ', error
                 do c_1 = 1, n
-                   write(6, '(100f8.3)')(ar(c_1,c_2), c_2=1,m)
+                   write(6, '(100f8.3)')(out(c_1,c_2), c_2=1,m)
                 enddo
           endif
 call MPI_FINALIZE(error)
