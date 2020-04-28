@@ -3,11 +3,11 @@ program Laplace
   implicit none
   include 'mpif.h'
   INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
-  integer :: i, j, n, m, c_1, c_2, c_3, s, k, c, duck_1, duck_2, iter, iterrations
+  integer :: i, j, n, m, s, c_1, c_2, c_3, s, k, c, duck_1, duck_2, iter, iterrations
   integer, allocatable ::  MBAND(:), disp(:)
-  real :: eps, err_0, error, dt1, dt2
+  real :: eps, err_0, error, dt1, dt2, mrbin
   double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), iBAND(:,:)
-  double precision, allocatable :: tm(:), t(:), row(:), g(:), g_0(:), disp(:)
+  double precision, allocatable :: tm(:), t(:), row(:), out(:), g_0(:), disp(:)
   double precision :: tmp, eps, err_0, error
 
 call MPI_INIT(ERR)
@@ -91,17 +91,25 @@ allocate(disp(SIZE))
   do c_2 = 2, SIZE - 1
       row(c_2) = row(c_2) + 1
   enddo
+
+  write(6,*)'disp = ', disp
+
+  write(6,*)'row = ', row
 !-------------------------------------B----------------------------------------!
     do c_1 = 1, SIZE - 1
       int = MBAND(i + 1)
       allocate(iBAND(int,m1))
       do c_2 = 1, int!m     !do c_1 = 1,iBAND
         do c_3 = 1, m1
-            iBAND(c_2,c_3) = E(c_1+c_2+disp(1)-2, c_3) !заполнение, c_1 i+j
+            iBAND(c_2,c_3) = tm(c_1+c_2+disp(1)-2, c_3) !заполнение, c_1 i+j
         enddo
       enddo
-
+!2 3 svobodni
       call MPI_SEND(iBAND, int*n,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)!mmm*c
+      write(6,*)'Band on ',c_1,'=='
+      do c_2=1, int
+        write(6,'(100f8.3)')(tb(c_2,c_3),c_3 =1,m)
+      enddo
       deallocate (iBAND)!---
       !duck_2 = duck_2 + 1
       !write(6,*),duck_2,RANK
@@ -112,14 +120,15 @@ CALL MPI_BCAST(n, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(m, 1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(eps, 1, MPI_REAL, 0, MPI_COMM_WORLD, ERR)
 CALL MPI_BCAST(iter,1, MPI_INTEGER, 0, MPI_COMM_WORLD, ERR)
+CALL MPI_BCAST(row, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD, err)
 CALL MPI_BCAST(MBAND, SIZE, MPI_DOUBLE_PRECISION, 0, MPI_COMM_WORLD,ERR)
 allocate(row(np))
 
 if (RANK .eq. 0) then
   int = MBAND(1)
-  allocate(iBAND(n,int))
-  do c_1 = 1, n
-    do c_2 = 1, int
+  allocate(iBAND(int,m)) !tut tozhe ne ponyatno nm int 1 ili 2 s por-m...
+  do c_1 = 1, int
+    do c_2 = 1, m
       iBAND(c_1,c_2) = tm(c_1,c_2)
     enddo
   enddo
@@ -129,19 +138,20 @@ if (RANK .eq. 0) then
   !enddo
 else !----------------
   int = MBAND(RANK + 1)
-  CALL MPI_RECV(iBAND, int*n,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR)
+  allocate(iBAND(int,m), t(int,m))
+  CALL MPI_RECV(iBAND, int*n,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR) !т/т
   endif
 
   !http://www2.sscc.ru/Publikacii/Primery_Prll/1-4.htm
 !SDVIG
   if (RANK .eq. 0) then
-    top = MPI_PROC_NULL
+    top = MPI_PROC_NULL                            !VERH
   else
     top = RANK - 1
   endif
 
   if (RANK .eq. 1) then
-    botton = MPI_PROC_NULL
+    botton = MPI_PROC_NULL                         !NIZ-KARNIZ
   else
     botton = RANK + 1
   endif
@@ -200,14 +210,14 @@ if (RANK .eq. 0) then
   s = disp (1)
   do c_1, SZIE - 1
     if (c_1 .eq. (SIZE - 1)) then
-      bin = 0
+      mrbin = 0
     else
-      bin = 1
+      mrbin = 1
     endif
-    c = row (c_1 + 1)
+    int = row (c_1 + 1)
     allocate(iBAND(c,m))
-    CALL MPI_RECV(iBAND, c*m, MPI_DOUBLE_PRECISION, c_1,c_1+1, MPI_COMM_WORLD, ST, ERR)
-    do c_2 = 2, c - bin
+    CALL MPI_RECV(iBAND, int*m, MPI_DOUBLE_PRECISION, c_1,c_1+1, MPI_COMM_WORLD, ST, ERR)
+    do c_2 = 2, int - mrbin
       do c_3 = 1, m
         out(c_2 + s - 1, c_3) = iBAND(c_2,c_3)
       enddo
