@@ -108,7 +108,7 @@ allocate(disp(SIZE))
       call MPI_SEND(iBAND, int*n,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)!mmm*c
       write(6,*)'Band on ',c_1,'=='
       do c_2=1, int
-        write(6,'(100f8.3)')(tb(c_2,c_3),c_3 =1,m)
+        write(6,'(100f8.3)')(iBAND(c_2,c_3),c_3 =1,m)
       enddo
       deallocate (iBAND)!---
       !duck_2 = duck_2 + 1
@@ -208,7 +208,7 @@ endif
 
 if (RANK .eq. 0) then
   s = disp (1)
-  do c_1, SZIE - 1
+  do c_1 = 1, SZIE - 1
     if (c_1 .eq. (SIZE - 1)) then
       mrbin = 0
     else
@@ -217,7 +217,7 @@ if (RANK .eq. 0) then
     int = row (c_1 + 1)
     allocate(iBAND(c,m))
     CALL MPI_RECV(iBAND, int*m, MPI_DOUBLE_PRECISION, c_1, 10+c_1, MPI_COMM_WORLD, ST, ERR)
-    do c_2 = 2, int - mrbin
+    do c_2 = 2, (int - mrbin)
       do c_3 = 1, m
         out(c_2 + s - 1, c_3) = iBAND(c_2,c_3)
       enddo
