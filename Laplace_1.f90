@@ -208,14 +208,14 @@ endif
 
 if (RANK .eq. 0) then
   s = disp (1)
-  do c_1 = 1, SZIE - 1
+  do c_1 = 1, SIZE - 1
     if (c_1 .eq. (SIZE - 1)) then
       mrbin = 0
     else
       mrbin = 1
     endif
     int = row (c_1 + 1)
-    allocate(iBAND(c,m))
+    allocate(iBAND(int,m))
     CALL MPI_RECV(iBAND, int*m, MPI_DOUBLE_PRECISION, c_1, 10+c_1, MPI_COMM_WORLD, ST, ERR)
     do c_2 = 2, (int - mrbin)
       do c_3 = 1, m
