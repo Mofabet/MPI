@@ -155,7 +155,7 @@ else !----------------
     top = RANK - 1
   endif
 
-  if (RANK .eq. 1) then
+  if (RANK .eq. SIZE - 1) then
     bottom = MPI_PROC_NULL                         !NIZ-KARNIZ
   else
     bottom = RANK + 1
