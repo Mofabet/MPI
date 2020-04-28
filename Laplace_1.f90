@@ -4,10 +4,10 @@ program Laplace
   include 'mpif.h'
   INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
   integer :: i, j, n, m, s, c_1, c_2, c_3, duck_1, k, top, bottom, iter, iterrations, NE_INT, mrbin
-  integer, allocatable ::  MBAND(:)
+  integer, allocatable ::  MBAND(:), row(:), disp(:)
   real :: eps, err_0, error, dt1, dt2
   double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), iBAND(:,:)
-  double precision, allocatable :: tm(:,:), t(:,:), out(:,:), g_0(:), row(:), disp(:)
+  double precision, allocatable :: tm(:,:), t(:,:), out(:,:), g_0(:)
   double precision :: tmp
 
 call MPI_INIT(ERR)
