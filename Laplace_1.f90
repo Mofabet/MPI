@@ -179,12 +179,12 @@ do c_1 = 2, (int - 1)
   enddo
 enddo
 
-iBAND = t
+iBAND = T
 
-CALL MPI_SENDRECV(t(2,:), m, MPI_DOUBLE_PRECISION, top, 10**6 + 1000*RANK + iter, & !тег надо заменить, если лимит будет привышен
+CALL MPI_SENDRECV(T(2,:), m, MPI_DOUBLE_PRECISION, top, 10**6 + 1000*RANK + iter, & !тег надо заменить, если лимит будет привышен
 iBAND(int, :), m, MPI_DOUBLE_PRECISION, bottom, 10**6 + 1000*(RANK + 1) + iter, & !можно повысить степень ранка, а ост оставить
 MPI_COMM_WORLD, ST, ERR)
-CALL MPI_SENDRECV(t(int - 1,:), m, MPI_DOUBLE_PRECISION, bottom,  2*10**6 + 1000*RANK + iter, &
+CALL MPI_SENDRECV(T(int - 1,:), m, MPI_DOUBLE_PRECISION, bottom,  2*10**6 + 1000*RANK + iter, &
 IBAND(1,:), m,MPI_DOUBLE_PRECISION,top,  2*10**6 + 1000*(RANK - 1) + iter, &
 MPI_COMM_WORLD, ST, ERR)
 
@@ -224,10 +224,10 @@ if (RANK .eq. 0) then
     CALL MPI_RECV(iBAND, int*m, MPI_DOUBLE_PRECISION, c_1, 10+c_1, MPI_COMM_WORLD, ST, ERR)
     do c_2 = 2, (int - mrbin) !!!!!!!!!!!
       do c_3 = 1, m
-        out(c_2 + s - 1, c_3) = iBAND(c_2,c_3)
+        out(c_2 + duck_1 - 1, c_3) = iBAND(c_2,c_3)
       enddo
     enddo
-    s = s + disp(c_1 + 1)
+    duck_1 = duck_1 + disp(c_1 + 1)
     deallocate(iBAND)
   enddo
 
