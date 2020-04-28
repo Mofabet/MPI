@@ -3,12 +3,12 @@ program Laplace
   implicit none
   include 'mpif.h'
   INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
-  integer :: i, j, n, m, s, c_1, c_2, c_3, s, k, c, duck_1, duck_2, iter, iterrations
-  integer, allocatable ::  MBAND(:), disp(:)
+  integer :: i, j, n, m, s, c_1, c_2, c_3, k, c, duck_1, duck_2, iter, iterrations
+  integer, allocatable ::  MBAND(:),
   real :: eps, err_0, error, dt1, dt2, mrbin
   double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), iBAND(:,:)
-  double precision, allocatable :: tm(:), t(:), row(:), out(:), g_0(:), disp(:)
-  double precision :: tmp, eps, err_0, error
+  double precision, allocatable :: tm(:,:), t(:,:), out(:,:), g_0(:), row(:), disp(:)
+  double precision :: tmp, err_0, error
 
 call MPI_INIT(ERR)
 call MPI_COMM_SIZE(MPI_COMM_WORLD, SIZE, ERR)
@@ -94,7 +94,7 @@ allocate(disp(SIZE))
 
   write(6,*)'disp = ', disp
 
-  write(6,*)'row = ', row
+!  write(6,*)'row = ', row
 !-------------------------------------B----------------------------------------!
     do c_1 = 1, SIZE - 1
       int = MBAND(i + 1)
@@ -186,7 +186,7 @@ MPI_COMM_WORLD, ST, ERR)
 CALL MPI_ALLREDUCE(err_0, error, 1, MPI_REAL, MPI_SUM, MPI_COMM_WORLD, ERR)
 error=sqrt(error)
 
-  if(error .lt. eps) exit
+  if(error .lt. eps) exit !почему экзит не робит?
 enddo
 
 !ccc                                                                        !ccc
