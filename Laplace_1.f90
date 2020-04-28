@@ -106,6 +106,7 @@ duck_1 = disp(1)-2
         enddo
       enddo
 !2 3 svobodni
+duck_1 = duck_1 + disp(c_1 + 1) - 1
       call MPI_SEND(iBAND, int*m,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)!mmm*c
       write(6,*)'Band on ',c_1,'=='
       do c_2=1, int
