@@ -1,26 +1,31 @@
 program Laplace
 
-implicit none
-include 'mpif.h'
-INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
-integer :: i, j, n, m, c_1, c_2, c_3, c_4, duck_1, disp, iter
-double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), MBAND(:,:), iBAND(:,:), X(:,:), X_0(:,:), X_1(:,:), g(:,:), g_0(:,:)
-double precision :: tmp, tmp_2, eps, err_0, error,
+  implicit none
+  include 'mpif.h'
+  INTEGER :: ERR, SIZE, RANK, ST(MPI_STATUS_SIZE)
+  integer :: i, j, n, m, c_1, c_2, c_3, s, k, c, duck_1, duck_2, iter, iterrations
+  integer, allocatable ::  MBAND(:), disp(:)
+  real :: eps, err_0, error, dt1, dt2
+  double precision, allocatable :: A(:,:), B(:,:), C(:,:), D(:,:), E(:,:), iBAND(:,:)
+  double precision, allocatable :: tm(:), t(:), row(:), g(:), g_0(:), disp(:)
+  double precision :: tmp, eps, err_0, error
 
 call MPI_INIT(ERR)
 call MPI_COMM_SIZE(MPI_COMM_WORLD, SIZE, ERR)
 call MPI_COMM_RANK(MPI_COMM_WORLD, RANK, ERR)
 
 if (RANK .eq. 0) then
-  write(6,*)'Точность'
+  write (6,*)'Initialization of the program'
+  write (6,*)'Enter the required accuracy:'
   read(*,*)eps
-
+!гениратор
   write(6,*) 'Input number of lines:'
   read(*,*)n
   write(6,*) 'Input number of columns:'
   read(*,*)m
   allocate(tm(n,m))
   tm(:,:)=0.d0
+  !чочтавим матрицу темп
   write(6,*) 'Input temperatures on 4 corners'
   write(6,*) 'Upper left:'
   read(*,*) tm(1,1)
@@ -31,42 +36,72 @@ if (RANK .eq. 0) then
   write(6,*) 'Lower right:'
   read(*,*) tm(n,m)
 
-  write(6,*) 'iterrations ='
-  read(*,*) iter
+  write(6,*) 'Number of iterrations ='
+  read(*,*) iterrations
+write(6,*)'--------------------------------------------------------------------'
 
   !open(10, file = 'A', form = 'formatted', status = 'unknown')
   !read(10,*)n1
   !read(10,*)m1
 
-  allocate(A(n,m))
+  allocate(row(SIZE))
 
-  do i=1,n
-      read(10,*)(A(i,j), j=1,m)
-  enddo
+!  do i=1,n
+!      read(10,*)(A(i,j), j=1,m)
+!  enddo
 
-  disp(:) = N1/SIZE
 
-  do i = 1, mod(m, SIZE)
-      disp(i) = disp(i)+1
+dt1=(tm(1,m)-tm(1,1))/m
+dt2=(tm(n,m)-tm(n,1))/m
+
+do i=2, m-1
+  tm(1,i)=tm(1,1)+i*dt1
+  tm(n,i)=tm(n,1)+i*dt2
+enddo
+
+dt1=(tm(n,1)-tm(1,1))/n
+dt2=(tm(n,m)-tm(1,m))/n
+
+do i=2, n-1
+  tm(i,1)=tm(1,1)+i*dt1
+  tm(i,m)=tm(1,m)+i*dt2
+enddo
+
+write(6,*)'Your list is'
+do c_1 = 1, n
+  write(6,'(100f8.3)')(tm(c_1,c_2), c_2=1,m)
+enddo
+
+!need alloc
+allocate(disp(SIZE))
+!allocate(array, stat=err)
+!if ( /= 0) print *, ": Allocation request denied"
+!
+!if (allocated()) deallocate(, stat=)
+!if ( /= 0) print *, ": Deallocation request denied"
+  disp(:) = N/SIZE
+
+  do c_1 = 1, mod(n, SIZE)
+      disp(c_1) = disp(c_1)+1
   enddo
 
   row(:) = disp(:) + 1
   !MBAND(SIZE) = disp(SIZE) + 1
 
-  do c_1 = 2, SIZE - 1
-      row(i) = row(i) + 2
+  do c_2 = 2, SIZE - 1
+      row(c_2) = row(c_2) + 1
   enddo
 !-------------------------------------B----------------------------------------!
     do c_1 = 1, SIZE - 1
       int = MBAND(i + 1)
-      allocate(iBAND(MBAND(c_1+1),m1))
-      do c_2 = 1, MBAND(c_1)!m     !do c_1 = 1,iBAND
+      allocate(iBAND(int,m1))
+      do c_2 = 1, int!m     !do c_1 = 1,iBAND
         do c_3 = 1, m1
-            iBAND(c_2,c_3) = E(c_1+c_2, c_3) !заполнение, c_1 i+j
+            iBAND(c_2,c_3) = E(c_1+c_2+disp(1)-2, c_3) !заполнение, c_1 i+j
         enddo
       enddo
 
-      call MPI_SEND(iBAND, int*n,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)
+      call MPI_SEND(iBAND, int*n,MPI_DOUBLE_PRECISION,c_1,20+c_1,MPI_COMM_WORLD,ERR)!mmm*c
       deallocate (iBAND)!---
       !duck_2 = duck_2 + 1
       !write(6,*),duck_2,RANK
@@ -85,7 +120,7 @@ if (RANK .eq. 0) then
   allocate(iBAND(n,int))
   do c_1 = 1, n
     do c_2 = 1, int
-      iBAND(c_1,c_2) = A(c_1,c_2)
+      iBAND(c_1,c_2) = tm(c_1,c_2)
     enddo
   enddo
 
@@ -97,20 +132,101 @@ else !----------------
   CALL MPI_RECV(iBAND, int*n,MPI_DOUBLE_PRECISION,0,20+RANK,MPI_COMM_WORLD,ST,ERR)
   endif
 
+  !http://www2.sscc.ru/Publikacii/Primery_Prll/1-4.htm
+!SDVIG
+  if (RANK .eq. 0) then
+    top = MPI_PROC_NULL
+  else
+    top = RANK - 1
+  endif
+
+  if (RANK .eq. 1) then
+    botton = MPI_PROC_NULL
+  else
+    botton = RANK + 1
+  endif
+
+  t = iBAND
+
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+!ccc                                                                        !ccc
+
+do iter = 1, iterrations
+err_0 = 0
+error = 0
+
+c = row(RANK + 1)
+
+do c_1 = 2, c - 1
+  do c_2, m - 1          !  1                    2                      3                    4
+    t(c_1,c_2) = (iBAND(c_1 - 1,c_2) + iBAND(c_1 + 1,c_2) + iBAND(c_1,c_2 - 1) + iBAND(c_1,c_2 + 1))/4
+    err_0 = err_0 + (t(c_1,c_2) - iBAND(c_1,c_2))**2
+  enddo
+enddo
+
+iBAND = t
+
+CALL MPI_SENDRECV(t(2,:), m, MPI_DOUBLE_PRECISION, top, 10**6 + 1000*RANK + iter), & !тег надо заменить, если лимит будет привышен
+iBAND(c, :), m, MPI_DOUBLE_PRECISION, bottom, 10**6 + 1000*(RANK + 1) + iter), & !можно повысить степень ранка, а ост оставить
+MPI_COMM_WORLD, ST, ERR)
+CALL MPI_SENDRECV(t(c-1,:), m, MPI_DOUBLE_PRECISION, bottom,  2*10**6 + 1000*RANK + iter), &
+IBAND(1,:), m,MPI_DOUBLE_PRECISION,top,  2*10**6 + 1000*(RANK - 1) + iter), &
+MPI_COMM_WORLD, ST, ERR)
+
+CALL MPI_ALLREDUCE(err_0, error, 1, MPI_REAL, MPI_SUM, MPI_COMM_WORLD, ERR)
+error=sqrt(error)
+
+  if(error .lt. eps) exit
+enddo
+
+!ccc                                                                        !ccc
+!ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+write(6,*)'Band on',rank,' = ', iBAND
+
+if (RANK .eq. 0) then
+  allocate(out(n,m))
+  do c_1 = 1, c - 1 !perenos
+    do c_2 = 1, m
+      out(c_1,c_2) = iBAND (c_1,c_2)
+    enddo
+  enddo
+deallocate(iBAND)
+else
+  call MPI_SEND(iBAND, c*m, MPI_DOUBLE_PRECISION, 0 RANK + 1, MPI_COMM_WORLD, ERR)
+endif
+
+if (RANK .eq. 0) then
+  s = disp (1)
+  do c_1, SZIE - 1
+    if (c_1 .eq. (SIZE - 1)) then
+      bin = 0
+    else
+      bin = 1
+    endif
+    c = row (c_1 + 1)
+    allocate(iBAND(c,m))
+    CALL MPI_RECV(iBAND, c*m, MPI_DOUBLE_PRECISION, c_1,c_1+1, MPI_COMM_WORLD, ST, ERR)
+    do c_2 = 2, c - bin
+      do c_3 = 1, m
+        out(c_2 + s - 1, c_3) = iBAND(c_2,c_3)
+      enddo
+    enddo
+    s = s + disp(c_1 + 1)
+    deallocate(iBAND)
+  enddo
 
 
 
-      CALL MPI_SENDRECV(x(:,2), n, MPI_DOUBLE_PRECISION, left,(RANK)+(k*k+k)*99, &
-      band(:,q), n, MPI_DOUBLE_PRECISION, right, &
-      (RANK+1)+(k*k+k)*99, MPI_COMM_WORLD, ST, ERR)
+if (RANK .eq. 0) then
+write(6,*)'--------------------------------------------------------------------'
+write(6,*)'ERROR = ', error
+            write(6,*)'Max number of iter was reached = ', error
+                do c_1 = 1, n
+                   write(6, '(100f8.3)')(ar(c_1,c_2), c_2=1,m)
+                enddo
+          endif
+call MPI_FINALIZE(error)
 
-      CALL MPI_SENDRECV(x(:,q-1), n, MPI_DOUBLE_PRECISION, right, (RANK)+(k*k+k)*909, &
-      band(:,1), n, MPI_DOUBLE_PRECISION, left, (RANK-1)+(k*k+k)*909, &
-      MPI_COMM_WORLD, ST, ERR)
 
-      CALL MPI_ALLREDUCE(error, sumerr, 1, MPI_REAL, MPI_SUM, MPI_COMM_WORLD, ERR)
-      sumerr = sqrt(sumerr)
-
-
-      call MPI_FINALIZE(ERR)
-      end
+end
