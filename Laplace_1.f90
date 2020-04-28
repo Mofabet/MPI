@@ -196,8 +196,8 @@ enddo !и что? 164 строка, но просит завершения
 !ccc                                                                        !ccc
 !ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 2000 continue
-
-write(6,*)'Band on',RANK,' = ', iBAND
+write(6,*)'Band on'
+write(6,*) RANK,' = ', iBAND
 
 if (RANK .eq. 0) then
   allocate(out(n,m))
